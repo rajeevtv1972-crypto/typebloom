@@ -435,11 +435,11 @@ refs.testTypes.forEach(tab => tab.addEventListener("click", () => selectTimed(ta
 refs.input.addEventListener("input", onTyping); refs.reset.addEventListener("click", reset); refs.next.addEventListener("click", next);
 refs.themeToggle.addEventListener("click", () => setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
 refs.panelButtons.forEach(button => button.addEventListener("click", () => openInfoPanel(button.dataset.panel)));
-refs.dialogClose.addEventListener("click", closeInfoPanel);
-refs.infoDialog.addEventListener("click", event => { if (event.target === refs.infoDialog) closeInfoPanel(); });
-refs.infoDialog.addEventListener("cancel", closeInfoPanel);
+if (refs.dialogClose) refs.dialogClose.addEventListener("click", closeInfoPanel);
+if (refs.infoDialog) refs.infoDialog.addEventListener("click", event => { if (event.target === refs.infoDialog) closeInfoPanel(); });
+if (refs.infoDialog) refs.infoDialog.addEventListener("cancel", closeInfoPanel);
 window.addEventListener("resize", () => { if (!state.finished) renderPrompt(true); });
 setTheme(localStorage.getItem("typebloom-theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
 const savedLevel = Math.min(20, Math.max(1, state.level));
 selectPractice(state.mode, isLevelUnlocked(state.mode, savedLevel) ? savedLevel : 1);
-refs.copyrightYear.textContent = String(new Date().getFullYear());
+if (refs.copyrightYear) refs.copyrightYear.textContent = String(new Date().getFullYear());
