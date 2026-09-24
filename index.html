@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="TypeBloom typing practice with progressive levels and timed WPM and CPM tests." />
-    <title>TypeBloom · typing practice</title>
+    <meta name="description" content="TypeBloom is a friendly typing practice garden with levels and timed tests." />
+    <title>TypeBloom · grow your typing confidence</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -12,52 +12,47 @@
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3756147512527882"
      crossorigin="anonymous"></script>
   </head>
-  <body class="app-page">
+  <body id="top" class="landing-only">
     <div class="glow glow-a"></div>
     <div class="glow glow-b"></div>
     <header class="topbar">
-      <a class="brand" href="main.html" aria-label="TypeBloom home">
+      <a class="brand" href="main.html" id="brandHome" aria-label="TypeBloom home">
         <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 48 48" role="img"><path d="M14 7c7 1 11 5 11 12-7 0-11-4-11-12Z" fill="currentColor"/><path d="M25 7c7 1 11 5 11 12-7 0-11-4-11-12Z" fill="currentColor" opacity=".72"/><rect x="6" y="20" width="36" height="19" rx="6" fill="none" stroke="currentColor" stroke-width="3"/><path d="M13 27h3m4 0h3m4 0h3m4 0h2M13 33h22" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>
         Type<span>Bloom</span>
       </a>
       <div class="top-actions">
         <p>✦ Tiny steps, big progress</p>
-        <a class="home-button" href="main.html">Home</a>
+        
         <button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch to dark theme"><span id="themeIcon">☾</span></button>
       </div>
     </header>
-    <main id="appPage" class="app-shell">
-      <aside class="sidebar" aria-label="Typing test navigation">
-        <div class="sidebar-heading"><p class="eyebrow">Your practice path</p><h1>Pick a little<br />challenge.</h1></div>
-        <div class="mode-tabs" role="tablist" aria-label="Difficulty">
-          <button class="mode-tab active" type="button" data-mode="beginner" role="tab" aria-selected="true"><i>🌱</i><span><b>Beginner</b><small>Start gently</small></span></button>
-          <button class="mode-tab" type="button" data-mode="intermediate" role="tab" aria-selected="false"><i>🌤</i><span><b>Intermediate</b><small>Find your flow</small></span></button>
-          <button class="mode-tab" type="button" data-mode="advanced" role="tab" aria-selected="false"><i>🚀</i><span><b>Advanced</b><small>Stretch your speed</small></span></button>
+    <section id="landingPage" class="landing-page" aria-labelledby="landingTitle">
+      <div class="landing-hero">
+        <div class="landing-copy">
+          <p class="eyebrow">A calmer way to get faster</p>
+          <h1 id="landingTitle">Begin your<br /><em>typing journey.</em></h1>
+          <p class="landing-lede">Build a natural rhythm with friendly levels, focused timed tests, and progress that stays right on your device.</p>
+          <div class="landing-actions">
+            <a id="beginButton" class="begin-button" href="typing.html">Let's begin <span aria-hidden="true">→</span></a>
+            <a class="learn-link" href="#howItWorks">See how it works <span aria-hidden="true">↓</span></a>
+          </div>
+          <div class="trust-row"><span>✓ No account needed</span><span>✓ Your progress stays local</span><span>✓ Free to begin</span></div>
         </div>
-        <div class="section-title"><p class="eyebrow" id="levelHeading">Beginner levels</p><span id="completionCount">0 / 20</span></div>
-        <div id="levelGrid" class="level-grid" aria-label="Available practice levels"></div>
-        <section class="test-studio" aria-labelledby="timedHeading">
-          <div class="section-title compact"><p class="eyebrow" id="timedHeading">Timed tests</p><span>2–15 min</span></div>
-          <div class="test-type-buttons"><button class="test-type" type="button" data-test="speed"><i>⚡</i><span><b>Speed test</b><small>Track WPM</small></span></button><button class="test-type" type="button" data-test="cpm"><i>⌁</i><span><b>CPM test</b><small>Track characters</small></span></button></div>
-          <div id="durationGrid" class="duration-grid" aria-label="Choose test duration"></div>
-        </section>
-        <div class="sidebar-footer"><span>🌼</span><p><strong id="totalCompleted">0</strong> of 60 little wins<br />collected so far.</p></div>
-      </aside>
+        <div class="hero-garden" aria-hidden="true">
+          <div class="sun-disc"></div><div class="leaf leaf-one"></div><div class="leaf leaf-two"></div>
+          <div class="hero-keyboard"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><b></b></div>
+          <div class="hero-note note-one">5 → 100 words</div><div class="hero-note note-two">grow at your pace</div>
+        </div>
+      </div>
 
-      <section class="workspace" aria-labelledby="challengeTitle">
-        <div class="workspace-heading"><div><p class="eyebrow" id="challengeMeta">Beginner · Level 1</p><h2 id="challengeTitle">Warm up your fingers</h2></div><div class="bloom-pill"><span>🔥</span><b id="bloomCount">0</b><span>in bloom</span></div></div>
-        <aside class="ad-slot app-ad" aria-label="Advertisement placement"><span>Advertisement</span><small>Your sponsored message could live here</small></aside>
-        <section class="typing-card" aria-label="Current typing challenge">
-          <div class="card-top"><span id="challengeChip" class="chip">Easy start</span><span id="tipText" class="tip">Relax your shoulders and look ahead.</span></div>
-          <div class="prompt-box"><p id="typingPrompt" class="typing-prompt" aria-label="Text to type"></p></div>
-          <label class="sr-only" for="typingInput">Type the prompt</label><textarea id="typingInput" rows="3" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="Click here and begin typing..."></textarea><p id="inputHelp" class="input-help">Your timer begins with the first letter. No pressure.</p>
-          <div class="card-bottom"><div class="progress-area"><div id="progressTrack" class="progress-track" role="progressbar" aria-label="Challenge progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="progressFill"></div></div><span id="progressLabel">0% complete</span></div><button id="resetButton" class="reset-button" type="button">↻ Start over</button></div>
-        </section>
-        <section class="stats-row" aria-label="Live typing statistics"><article class="stat"><i class="mint">⚡</i><div><p id="primaryStatName">Speed</p><strong id="primaryStat">0 <small>WPM</small></strong></div></article><article class="stat"><i class="peach">◎</i><div><p>Accuracy</p><strong id="accuracyStat">100<small>%</small></strong></div></article><article class="stat"><i class="lavender">◷</i><div><p id="timeStatName">Time</p><strong id="timeStat">0:00</strong></div></article><article class="stat best-stat"><i class="yellow">★</i><div><p>Personal best</p><strong id="bestStat">—</strong></div></article></section>
-        <section id="celebration" class="celebration" aria-live="polite" hidden><i>✦</i><div><p class="eyebrow" id="celebrationEyebrow">Level complete</p><h3 id="celebrationTitle">That was lovely!</h3><p id="celebrationCopy"></p></div><button id="nextButton" class="next-button" type="button">Next level →</button></section>
-        <p class="workspace-footer"><span>⌘</span> Accuracy first, speed follows naturally.</p>
+      <aside class="ad-slot landing-ad" aria-label="Advertisement placement"><span>Advertisement</span><small>Reserved space for a future sponsor</small></aside>
+
+      <section id="howItWorks" class="landing-features" aria-label="How TypeBloom works">
+        <article><i>🌱</i><h2>Start softly</h2><p>Begin with five words and unlock each next level by completing the one before it.</p></article>
+        <article><i>⌨</i><h2>Find your flow</h2><p>See three clear lines at a time, while the passage glides forward as you type.</p></article>
+        <article><i>✦</i><h2>Grow with data</h2><p>Practice with levels or test your WPM and CPM over any duration from 2 to 15 minutes.</p></article>
       </section>
-    </main>
+    </section>
     <footer class="site-footer">
       <div class="footer-grid">
         <div>
@@ -81,13 +76,24 @@
         <span class="footer-links"><button data-panel="about" type="button">About</button><a href="privacy-policy.html">Privacy Policy</a><button data-panel="contact" type="button">Contact</button></span>
       </div>
     </footer>
-    <dialog id="infoDialog" class="info-dialog" aria-labelledby="dialogTitle">
-      <div class="dialog-head">
-        <h2 id="dialogTitle"></h2>
-        <button id="dialogClose" type="button" aria-label="Close">×</button>
-      </div>
-      <div id="dialogBody" class="dialog-body"></div>
-    </dialog>
-    <script src="app.js"></script>
+    <script>
+(function(){
+  const root=document.documentElement;
+  const toggle=document.getElementById("themeToggle");
+  const icon=document.getElementById("themeIcon");
+  const saved=localStorage.getItem("typebloom-theme")||"light";
+  function applyTheme(theme){
+    root.dataset.theme=theme;
+    icon.textContent=theme==="dark"?"☀":"☾";
+    toggle.setAttribute("aria-label",theme==="dark"?"Switch to light theme":"Switch to dark theme");
+  }
+  applyTheme(saved);
+  toggle.addEventListener("click",function(){
+    const next=root.dataset.theme==="dark"?"light":"dark";
+    applyTheme(next);
+    localStorage.setItem("typebloom-theme",next);
+  });
+})();
+</script>
   </body>
 </html>
