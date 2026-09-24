@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="TypeBloom typing practice with progressive levels and timed WPM and CPM tests." />
+    <title>TypeBloom · typing practice</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3756147512527882"
+     crossorigin="anonymous"></script>
+  </head>
+  <body class="app-page">
+    <div class="glow glow-a"></div>
+    <div class="glow glow-b"></div>
+    <header class="topbar">
+      <a class="brand" href="main.html" aria-label="TypeBloom home">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 48 48" role="img"><path d="M14 7c7 1 11 5 11 12-7 0-11-4-11-12Z" fill="currentColor"/><path d="M25 7c7 1 11 5 11 12-7 0-11-4-11-12Z" fill="currentColor" opacity=".72"/><rect x="6" y="20" width="36" height="19" rx="6" fill="none" stroke="currentColor" stroke-width="3"/><path d="M13 27h3m4 0h3m4 0h3m4 0h2M13 33h22" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>
+        Type<span>Bloom</span>
+      </a>
+      <div class="top-actions">
+        <p>✦ Tiny steps, big progress</p>
+        <a class="home-button" href="main.html">Home</a>
+        <button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch to dark theme"><span id="themeIcon">☾</span></button>
+      </div>
+    </header>
+    <main id="appPage" class="app-shell">
+      <aside class="sidebar" aria-label="Typing test navigation">
+        <div class="sidebar-heading"><p class="eyebrow">Your practice path</p><h1>Pick a little<br />challenge.</h1></div>
+        <div class="mode-tabs" role="tablist" aria-label="Difficulty">
+          <button class="mode-tab active" type="button" data-mode="beginner" role="tab" aria-selected="true"><i>🌱</i><span><b>Beginner</b><small>Start gently</small></span></button>
+          <button class="mode-tab" type="button" data-mode="intermediate" role="tab" aria-selected="false"><i>🌤</i><span><b>Intermediate</b><small>Find your flow</small></span></button>
+          <button class="mode-tab" type="button" data-mode="advanced" role="tab" aria-selected="false"><i>🚀</i><span><b>Advanced</b><small>Stretch your speed</small></span></button>
+        </div>
+        <div class="section-title"><p class="eyebrow" id="levelHeading">Beginner levels</p><span id="completionCount">0 / 20</span></div>
+        <div id="levelGrid" class="level-grid" aria-label="Available practice levels"></div>
+        <section class="test-studio" aria-labelledby="timedHeading">
+          <div class="section-title compact"><p class="eyebrow" id="timedHeading">Timed tests</p><span>2–15 min</span></div>
+          <div class="test-type-buttons"><button class="test-type" type="button" data-test="speed"><i>⚡</i><span><b>Speed test</b><small>Track WPM</small></span></button><button class="test-type" type="button" data-test="cpm"><i>⌁</i><span><b>CPM test</b><small>Track characters</small></span></button></div>
+          <div id="durationGrid" class="duration-grid" aria-label="Choose test duration"></div>
+        </section>
+        <div class="sidebar-footer"><span>🌼</span><p><strong id="totalCompleted">0</strong> of 60 little wins<br />collected so far.</p></div>
+      </aside>
+
+      <section class="workspace" aria-labelledby="challengeTitle">
+        <div class="workspace-heading"><div><p class="eyebrow" id="challengeMeta">Beginner · Level 1</p><h2 id="challengeTitle">Warm up your fingers</h2></div><div class="bloom-pill"><span>🔥</span><b id="bloomCount">0</b><span>in bloom</span></div></div>
+        <aside class="ad-slot app-ad" aria-label="Advertisement placement"><span>Advertisement</span><small>Your sponsored message could live here</small></aside>
+        <section class="typing-card" aria-label="Current typing challenge">
+          <div class="card-top"><span id="challengeChip" class="chip">Easy start</span><span id="tipText" class="tip">Relax your shoulders and look ahead.</span></div>
+          <div class="prompt-box"><p id="typingPrompt" class="typing-prompt" aria-label="Text to type"></p></div>
+          <label class="sr-only" for="typingInput">Type the prompt</label><textarea id="typingInput" rows="3" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="Click here and begin typing..."></textarea><p id="inputHelp" class="input-help">Your timer begins with the first letter. No pressure.</p>
+          <div class="card-bottom"><div class="progress-area"><div id="progressTrack" class="progress-track" role="progressbar" aria-label="Challenge progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="progressFill"></div></div><span id="progressLabel">0% complete</span></div><button id="resetButton" class="reset-button" type="button">↻ Start over</button></div>
+        </section>
+        <section class="stats-row" aria-label="Live typing statistics"><article class="stat"><i class="mint">⚡</i><div><p id="primaryStatName">Speed</p><strong id="primaryStat">0 <small>WPM</small></strong></div></article><article class="stat"><i class="peach">◎</i><div><p>Accuracy</p><strong id="accuracyStat">100<small>%</small></strong></div></article><article class="stat"><i class="lavender">◷</i><div><p id="timeStatName">Time</p><strong id="timeStat">0:00</strong></div></article><article class="stat best-stat"><i class="yellow">★</i><div><p>Personal best</p><strong id="bestStat">—</strong></div></article></section>
+        <section id="celebration" class="celebration" aria-live="polite" hidden><i>✦</i><div><p class="eyebrow" id="celebrationEyebrow">Level complete</p><h3 id="celebrationTitle">That was lovely!</h3><p id="celebrationCopy"></p></div><button id="nextButton" class="next-button" type="button">Next level →</button></section>
+        <p class="workspace-footer"><span>⌘</span> Accuracy first, speed follows naturally.</p>
+      </section>
+    </main>
+    <footer class="site-footer">
+      <div class="footer-grid">
+        <div>
+          <a class="brand footer-brand" href="#top" id="footerHome" aria-label="TypeBloom home"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M14 7c7 1 11 5 11 12-7 0-11-4-11-12Z" fill="currentColor"/><path d="M25 7c7 1 11 5 11 12-7 0-11-4-11-12Z" fill="currentColor" opacity=".72"/><rect x="6" y="20" width="36" height="19" rx="6" fill="none" stroke="currentColor" stroke-width="3"/><path d="M13 27h3m4 0h3m4 0h3m4 0h2M13 33h22" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>Type<span>Bloom</span></a>
+          <p>A little corner of the web for more confident, comfortable typing.</p>
+        </div>
+        <div>
+          <p class="eyebrow">Explore</p>
+          <a href="about.html">About TypeBloom</a>
+          <a href="privacy-policy.html">Privacy Policy</a>
+          <a href="contact.html">Contact Us</a>
+        </div>
+        <div>
+          <p class="eyebrow">Contact</p>
+          <a href="mailto:contactussiteinfotechdesk@gmail.com">contactussiteinfotechdesk@gmail.com</a>
+          <span class="footer-note">We usually respond within 24–48 hours.</span>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span id="copyrightYear">2026</span> TypeBloom • All Rights Reserved</span>
+        <span class="footer-links"><button data-panel="about" type="button">About</button><a href="privacy-policy.html">Privacy Policy</a><button data-panel="contact" type="button">Contact</button></span>
+      </div>
+    </footer>
+    <dialog id="infoDialog" class="info-dialog" aria-labelledby="dialogTitle">
+      <div class="dialog-head">
+        <h2 id="dialogTitle"></h2>
+        <button id="dialogClose" type="button" aria-label="Close">×</button>
+      </div>
+      <div id="dialogBody" class="dialog-body"></div>
+    </dialog>
+    <script src="app.js"></script>
+  </body>
+</html>
