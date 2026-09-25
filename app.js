@@ -281,6 +281,77 @@ function renderDailySummary() {
   }
 }
 
+const weakPracticeWords = "accuracy adjust again answer apple around become because before better between browser build calm careful character choose clean clear common complete confidence correct create detail easy effort every example focus gentle great improve keyboard learn letter little message natural notice practice precise progress quick quiet repeat reliable rhythm smooth space steady strong system typing useful value warm words write your yourself".split(" ");
+
+function mistakeLabel(expected, actual) {
+  if (expected === " " || actual === " ") return "space";
+  if (expected === undefined) return "extra → " + actual;
+  if (actual === undefined) return expected + " → missing";
+  return expected + " → " + actual;
+}
+function collectCurrentErrors() {
+  const target = currentText();
+  const typed = Array.from(refs.input.value);
+  const goal = Array.from(target);
+  const limit = Math.max(typed.length, goal.length);
+  for (let index = 0; index < limit; index += 1) {
+    if (typed[index] === goal[index]) continue;
+    const label = mistakeLabel(goal[index], typed[index]);
+    state.errorMap[label] = (state.errorMap[label] || 0) + 1;
+    state.totalErrors += 1;
+  }
+}
+function getErrorEntries() {
+  return Object.entries(state.errorMap)
+    .map(([label, count]) => ({ label, count }))
+    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
+}
+function buildWeakPracticeText() {
+  const entries = getErrorEntries().slice(0, 5);
+  const focusChars = new Set();
+  let wantsSpace = false;
+  entries.forEach(entry => {
+    if (entry.label === "space") { wantsSpace = true; return; }
+    const parts = entry.label.split(" → ");
+    parts.forEach(part => {
+      if (part && part !== "missing" && part !== "extra") focusChars.add(part.toLowerCase());
+    });
+  });
+  let candidates = weakPracticeWords.filter(word => {
+    if (!focusChars.size) return true;
+    return Array.from(word.toLowerCase()).some(ch => focusChars.has(ch));
+  });
+  if (!candidates.length) candidates = weakPracticeWords.slice();
+  const shuffled = candidates.slice().sort(() => Math.random() - 0.5);
+  const selected = [];
+  for (let index = 0; index < 55; index += 1) {
+    let word = shuffled[index % shuffled.length];
+    if (wantsSpace && index % 9 === 0 && shuffled.length > 1) word = shuffled[(index + 3) % shuffled.length];
+    selected.push(word);
+  }
+  return selected.join(" ");
+}
+function renderErrorAnalysis() {
+  if (!refs.errorAnalysis) return;
+  const entries = getErrorEntries().slice(0, 5);
+  if (!entries.length) {
+    refs.errorAnalysis.hidden = true;
+    return;
+  }
+  refs.errorAnalysis.hidden = false;
+  refs.errorSummary.textContent = state.totalErrors
+    ? state.totalErrors + " mismatch" + (state.totalErrors === 1 ? "" : "es") + " found. Focus on these patterns and turn them into your next practice session."
+    : "No mismatches found. Lovely precision!";
+  refs.errorList.replaceChildren();
+  entries.forEach((entry, index) => {
+    const card = document.createElement("div");
+    card.className = "error-item";
+    card.innerHTML = "<span class=\"error-rank\">" + (index + 1) + "</span><strong>" + entry.label + "</strong><small>" + entry.count + " mistake" + (entry.count === 1 ? "" : "s") + "</small>";
+    refs.errorList.append(card);
+  });
+  refs.weakPracticeButton.textContent = entries.length ? "Practice these weak spots →" : "Practice weak spots →";
+}
+
 const $ = selector => document.querySelector(selector);
 const refs = {
   modeTabs: document.querySelectorAll(".mode-tab"),
@@ -294,6 +365,7 @@ const refs = {
   timeName: $("#timeStatName"), time: $("#timeStat"), best: $("#bestStat"),
   reset: $("#resetButton"), celebration: $("#celebration"), celebrationEyebrow: $("#celebrationEyebrow"),
   celebrationTitle: $("#celebrationTitle"), celebrationCopy: $("#celebrationCopy"), next: $("#nextButton"),
+  errorAnalysis: $("#errorAnalysis"), errorSummary: $("#errorSummary"), errorList: $("#errorList"), weakPracticeButton: $("#weakPracticeButton"),
   themeToggle: $("#themeToggle"), themeIcon: $("#themeIcon"),
   infoDialog: $("#infoDialog"), dialogTitle: $("#dialogTitle"), dialogBody: $("#dialogBody"),
   dialogClose: $("#dialogClose"), panelButtons: document.querySelectorAll("[data-panel]"), copyrightYear: $("#copyrightYear"),
@@ -305,7 +377,8 @@ let saved = loadSaved();
 let state = {
   kind: "practice", mode: saved.lastMode || "beginner", level: saved.lastLevel || 1,
   testType: "speed", duration: 2, promptIndex: 0, startedAt: null, elapsed: 0,
-  timer: null, finished: false, totalTyped: 0, totalCorrect: 0, lineStarts: [0], lineHeight: 0
+  timer: null, finished: false, totalTyped: 0, totalCorrect: 0, totalErrors: 0, errorMap: {}, lineStarts: [0], lineHeight: 0,
+  dailyChallenge: null, weakText: ""
 };
 
 function loadSaved() {
@@ -317,8 +390,9 @@ function save() {
   localStorage.setItem(storageKey, JSON.stringify(saved));
 }
 function currentText() {
+  if (state.kind === "weak") return state.weakText;
   if (state.kind === "daily") return state.dailyChallenge?.text || getDailyChallenge().text;
-  if (state.kind === "practice") {
+  if (state.kind === "practice" || state.kind === "weak") {
     const seed = levels[state.mode][state.level - 1][2];
     const goal = practiceWordsPerLevel[state.mode] * state.level;
     return buildPassage(seed, goal, state.level - 1, passageFillers);
@@ -460,6 +534,7 @@ function updateNav() {
   renderLevels(); renderDurations(); renderDailySummary();
 }
 function setBest() {
+  if (state.kind === "weak") { refs.best.textContent = "—"; return; }
   if (state.kind === "daily") {
     const stats = getDailyStats();
     refs.best.innerHTML = stats.bestWpm ? stats.bestWpm + " <small>WPM</small>" : "—";
@@ -471,9 +546,9 @@ function setBest() {
 }
 function stopTimer() { clearInterval(state.timer); state.timer = null; }
 function cleanChallenge() {
-  stopTimer(); state.startedAt = null; state.elapsed = 0; state.finished = false; state.totalTyped = 0; state.totalCorrect = 0; state.lineStarts = [0]; state.lineHeight = 0;
+  stopTimer(); state.startedAt = null; state.elapsed = 0; state.finished = false; state.totalTyped = 0; state.totalCorrect = 0; state.totalErrors = 0; state.errorMap = {}; state.lineStarts = [0]; state.lineHeight = 0;
   refs.input.value = ""; refs.input.disabled = false; refs.input.placeholder = "Click here and begin typing...";
-  refs.celebration.hidden = true; refs.next.disabled = false;
+  refs.celebration.hidden = true; refs.next.disabled = false; if (refs.errorAnalysis) refs.errorAnalysis.hidden = true;
 }
 function renderDaily() {
   state.kind = "daily";
@@ -494,6 +569,19 @@ function selectDaily() {
   renderDaily();
   requestAnimationFrame(() => refs.input.focus());
 }
+function renderWeakPractice() {
+  state.kind = "weak";
+  state.weakText = buildWeakPracticeText();
+  cleanChallenge();
+  refs.meta.textContent = "Focused practice";
+  refs.title.textContent = "Practice your weak spots";
+  refs.chip.textContent = "Weak-key workout · 55 words";
+  refs.tip.textContent = "Slow down and notice the tricky keys.";
+  refs.inputHelp.textContent = "This short workout is generated from your most common mistakes. Accuracy first, speed second.";
+  refs.primaryName.textContent = "Speed"; refs.timeName.textContent = "Time";
+  renderPrompt(true); refreshStats(); setBest(); updateNav(); save();
+}
+
 function renderPractice() {
   const item = levels[state.mode][state.level - 1];
   const wordGoal = practiceWordsPerLevel[state.mode] * state.level;
@@ -529,53 +617,56 @@ function startTimer() {
   if (state.startedAt) return;
   state.startedAt = Date.now();
   state.timer = setInterval(() => {
-    if (state.kind !== "practice" && statValues().elapsed >= state.duration * 60) {
-      if (state.kind === "daily") finishDaily();
-      else finishTimed();
-    } else refreshStats();
+    if (state.kind === "daily" && statValues().elapsed >= state.duration * 60) finishDaily();
+    else if (state.kind !== "practice" && state.kind !== "weak" && state.startedAt && statValues().elapsed >= state.duration * 60) finishTimed();
+    else refreshStats();
   }, 200);
 }
 function completePractice() {
   if (state.finished) return;
+  collectCurrentErrors();
   state.finished = true; state.elapsed = (Date.now() - state.startedAt) / 1000; stopTimer(); refs.input.disabled = true;
   const stats = statValues(); const old = saved.best[key()];
   const score = { value: stats.wpm, accuracy: stats.accuracy };
   const isBest = !old || score.value > old.value || (score.value === old.value && score.accuracy > old.accuracy);
-  saved.completed[key()] = true; if (isBest) saved.best[key()] = score; saved.recent = { kind: "practice", mode: state.mode, level: state.level, value: stats.wpm, accuracy: stats.accuracy, unit: "WPM", at: Date.now() };
+  saved.completed[key()] = true; if (isBest) saved.best[key()] = score; saved.recent = { kind: "practice", mode: state.mode, level: state.level, value: stats.wpm, accuracy: stats.accuracy, unit: "WPM", errors: getErrorEntries().slice(0, 5), at: Date.now() };
   refs.celebrationEyebrow.textContent = "Level complete";
   refs.celebrationTitle.textContent = isBest ? "A brand-new personal best!" : "That was lovely!";
   refs.celebrationCopy.textContent = stats.wpm + " WPM at " + stats.accuracy + "% accuracy. " + (isBest ? "Your garden is growing!" : "Every repeat makes you steadier.");
   refs.next.textContent = state.level < 20 ? "Next level →" : "Continue →";
-  refs.celebration.hidden = false; refreshStats(); setBest(); updateNav(); save();
+  refs.celebration.hidden = false; refreshStats(); setBest(); renderErrorAnalysis(); updateNav(); save();
 }
 function finishDaily() {
   if (state.finished) return;
+  collectCurrentErrors();
   state.finished = true; state.elapsed = Math.min(60, (Date.now() - state.startedAt) / 1000); stopTimer(); refs.input.disabled = true;
   const stats = statValues();
   const successful = recordDailyResult(stats);
   const globalStats = getDailyStats();
-  saved.recent = { kind: "daily", value: stats.wpm, accuracy: stats.accuracy, unit: "WPM", at: Date.now() };
+  saved.recent = { kind: "daily", value: stats.wpm, accuracy: stats.accuracy, unit: "WPM", errors: getErrorEntries().slice(0, 5), at: Date.now() };
   refs.celebrationEyebrow.textContent = successful ? "Daily challenge complete" : "Daily challenge";
   refs.celebrationTitle.textContent = successful ? "You kept the bloom alive! 🌸" : "So close — accuracy comes first.";
   refs.celebrationCopy.textContent = successful
     ? stats.wpm + " WPM at " + stats.accuracy + "% accuracy. " + globalStats.streak + "-day streak · best " + globalStats.bestWpm + " WPM."
     : stats.wpm + " WPM at " + stats.accuracy + "% accuracy. Reach 95%+ accuracy to complete today's challenge.";
   refs.next.textContent = successful ? "Try again →" : "Try again →";
-  refs.celebration.hidden = false; refreshStats(); setBest(); renderDailySummary(); save();
+  refs.celebration.hidden = false; refreshStats(); setBest(); renderErrorAnalysis(); renderDailySummary(); save();
 }
 function finishTimed() {
   if (state.finished) return;
+  collectCurrentErrors();
   state.finished = true; state.elapsed = state.duration * 60; stopTimer(); refs.input.disabled = true;
   const stats = statValues(); const isCpm = state.testType === "cpm"; const value = isCpm ? stats.cpm : stats.wpm; const unit = isCpm ? "CPM" : "WPM";
   const old = saved.best[key()]; const isBest = !old || value > old.value || (value === old.value && stats.accuracy > old.accuracy);
-  if (isBest) saved.best[key()] = { value, accuracy: stats.accuracy }; saved.recent = { kind: state.testType, duration: state.duration, value, accuracy: stats.accuracy, unit, at: Date.now() };
+  if (isBest) saved.best[key()] = { value, accuracy: stats.accuracy }; saved.recent = { kind: state.testType, duration: state.duration, value, accuracy: stats.accuracy, unit, errors: getErrorEntries().slice(0, 5), at: Date.now() };
   refs.celebrationEyebrow.textContent = state.duration + "-minute test complete";
   refs.celebrationTitle.textContent = isBest ? "A fresh personal best!" : "Strong, steady work!";
   refs.celebrationCopy.textContent = value + " " + unit + " at " + stats.accuracy + "% accuracy. " + (isBest ? "That is a lovely new benchmark." : "Try it again when you feel ready.");
-  refs.next.textContent = "Try another duration →"; refs.celebration.hidden = false; refreshStats(); setBest(); save();
+  refs.next.textContent = "Try another duration →"; refs.celebration.hidden = false; refreshStats(); setBest(); renderErrorAnalysis(); save();
 }
 function nextPrompt() {
   const target = currentText();
+  collectCurrentErrors();
   state.totalTyped += refs.input.value.length;
   state.totalCorrect += typedCorrect(refs.input.value, target);
   state.promptIndex += 1; refs.input.value = ""; renderPrompt(true); refreshStats();
@@ -583,17 +674,18 @@ function nextPrompt() {
 function onTyping() {
   if (state.finished) return;
   if (refs.input.value.length && !state.startedAt) startTimer();
-  if (state.kind !== "practice" && state.startedAt && statValues().elapsed >= state.duration * 60) { if (state.kind === "daily") finishDaily(); else finishTimed(); return; }
+  if (state.kind !== "practice" && state.kind !== "weak" && state.startedAt && statValues().elapsed >= state.duration * 60) { if (state.kind === "daily") finishDaily(); else finishTimed(); return; }
   renderPrompt(); refreshStats();
-  if (state.kind === "practice" && refs.input.value.length >= currentText().length) completePractice();
+  if ((state.kind === "practice" || state.kind === "weak") && refs.input.value.length >= currentText().length) completePractice();
   if (state.kind === "daily" && refs.input.value.length >= currentText().length) finishDaily();
-  else if (state.kind !== "practice" && state.kind !== "daily" && refs.input.value.length >= currentText().length) nextPrompt();
+  else if (state.kind !== "practice" && state.kind !== "daily" && state.kind !== "weak" && refs.input.value.length >= currentText().length) nextPrompt();
 }
 function reset() {
-  if (state.kind === "practice") renderPractice(); else if (state.kind === "daily") renderDaily(); else renderTimed();
+  if (state.kind === "practice") renderPractice(); else if (state.kind === "weak") renderWeakPractice(); else if (state.kind === "daily") renderDaily(); else renderTimed();
   refs.input.focus();
 }
 function next() {
+  if (state.kind === "weak") { renderWeakPractice(); refs.input.focus(); return; }
   if (state.kind === "daily") { selectDaily(); return; }
   if (state.kind !== "practice") { selectTimed(state.testType, state.duration); return; }
   if (state.level < 20) selectPractice(state.mode, state.level + 1);
@@ -639,6 +731,7 @@ function closeInfoPanel() {
 
 refs.modeTabs.forEach(tab => tab.addEventListener("click", () => selectPractice(tab.dataset.mode, 1)));
 if (refs.dailyButton) refs.dailyButton.addEventListener("click", selectDaily);
+if (refs.weakPracticeButton) refs.weakPracticeButton.addEventListener("click", () => { renderWeakPractice(); requestAnimationFrame(() => refs.input.focus()); });
 refs.testTypes.forEach(tab => tab.addEventListener("click", () => selectTimed(tab.dataset.test, state.duration)));
 refs.input.addEventListener("input", onTyping); refs.reset.addEventListener("click", reset); refs.next.addEventListener("click", next);
 refs.themeToggle.addEventListener("click", () => setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
