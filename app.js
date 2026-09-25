@@ -541,7 +541,7 @@ function completePractice() {
   const stats = statValues(); const old = saved.best[key()];
   const score = { value: stats.wpm, accuracy: stats.accuracy };
   const isBest = !old || score.value > old.value || (score.value === old.value && score.accuracy > old.accuracy);
-  saved.completed[key()] = true; if (isBest) saved.best[key()] = score;
+  saved.completed[key()] = true; if (isBest) saved.best[key()] = score; saved.recent = { kind: "practice", mode: state.mode, level: state.level, value: stats.wpm, accuracy: stats.accuracy, unit: "WPM", at: Date.now() };
   refs.celebrationEyebrow.textContent = "Level complete";
   refs.celebrationTitle.textContent = isBest ? "A brand-new personal best!" : "That was lovely!";
   refs.celebrationCopy.textContent = stats.wpm + " WPM at " + stats.accuracy + "% accuracy. " + (isBest ? "Your garden is growing!" : "Every repeat makes you steadier.");
@@ -554,6 +554,7 @@ function finishDaily() {
   const stats = statValues();
   const successful = recordDailyResult(stats);
   const globalStats = getDailyStats();
+  saved.recent = { kind: "daily", value: stats.wpm, accuracy: stats.accuracy, unit: "WPM", at: Date.now() };
   refs.celebrationEyebrow.textContent = successful ? "Daily challenge complete" : "Daily challenge";
   refs.celebrationTitle.textContent = successful ? "You kept the bloom alive! 🌸" : "So close — accuracy comes first.";
   refs.celebrationCopy.textContent = successful
@@ -567,7 +568,7 @@ function finishTimed() {
   state.finished = true; state.elapsed = state.duration * 60; stopTimer(); refs.input.disabled = true;
   const stats = statValues(); const isCpm = state.testType === "cpm"; const value = isCpm ? stats.cpm : stats.wpm; const unit = isCpm ? "CPM" : "WPM";
   const old = saved.best[key()]; const isBest = !old || value > old.value || (value === old.value && stats.accuracy > old.accuracy);
-  if (isBest) saved.best[key()] = { value, accuracy: stats.accuracy };
+  if (isBest) saved.best[key()] = { value, accuracy: stats.accuracy }; saved.recent = { kind: state.testType, duration: state.duration, value, accuracy: stats.accuracy, unit, at: Date.now() };
   refs.celebrationEyebrow.textContent = state.duration + "-minute test complete";
   refs.celebrationTitle.textContent = isBest ? "A fresh personal best!" : "Strong, steady work!";
   refs.celebrationCopy.textContent = value + " " + unit + " at " + stats.accuracy + "% accuracy. " + (isBest ? "That is a lovely new benchmark." : "Try it again when you feel ready.");
