@@ -346,7 +346,14 @@ function renderErrorAnalysis() {
   entries.forEach((entry, index) => {
     const card = document.createElement("div");
     card.className = "error-item";
-    card.innerHTML = "<span class=\"error-rank\">" + (index + 1) + "</span><strong>" + entry.label + "</strong><small>" + entry.count + " mistake" + (entry.count === 1 ? "" : "s") + "</small>";
+    const rank = document.createElement("span");
+    rank.className = "error-rank";
+    rank.textContent = String(index + 1);
+    const label = document.createElement("strong");
+    label.textContent = entry.label;
+    const count = document.createElement("small");
+    count.textContent = entry.count + " mistake" + (entry.count === 1 ? "" : "s");
+    card.append(rank, label, count);
     refs.errorList.append(card);
   });
   refs.weakPracticeButton.textContent = entries.length ? "Practice these weak spots →" : "Practice weak spots →";
@@ -473,7 +480,7 @@ function refreshStats() {
   const unit = isCpm ? "CPM" : "WPM";
   refs.primary.innerHTML = value + " <small>" + unit + "</small>";
   refs.accuracy.innerHTML = stats.accuracy + "<small>%</small>";
-  if (state.kind === "practice") {
+  if (state.kind === "practice" || state.kind === "weak") {
     const progress = Math.min(100, Math.round((refs.input.value.length / currentText().length) * 100));
     refs.time.textContent = formatTime(stats.elapsed);
     refs.progressFill.style.width = progress + "%";
@@ -624,16 +631,30 @@ function startTimer() {
 }
 function completePractice() {
   if (state.finished) return;
+  const isWeak = state.kind === "weak";
   collectCurrentErrors();
   state.finished = true; state.elapsed = (Date.now() - state.startedAt) / 1000; stopTimer(); refs.input.disabled = true;
-  const stats = statValues(); const old = saved.best[key()];
+  const stats = statValues();
+  const old = isWeak ? null : saved.best[key()];
   const score = { value: stats.wpm, accuracy: stats.accuracy };
-  const isBest = !old || score.value > old.value || (score.value === old.value && score.accuracy > old.accuracy);
-  saved.completed[key()] = true; if (isBest) saved.best[key()] = score; saved.recent = { kind: "practice", mode: state.mode, level: state.level, value: stats.wpm, accuracy: stats.accuracy, unit: "WPM", errors: getErrorEntries().slice(0, 5), at: Date.now() };
-  refs.celebrationEyebrow.textContent = "Level complete";
-  refs.celebrationTitle.textContent = isBest ? "A brand-new personal best!" : "That was lovely!";
-  refs.celebrationCopy.textContent = stats.wpm + " WPM at " + stats.accuracy + "% accuracy. " + (isBest ? "Your garden is growing!" : "Every repeat makes you steadier.");
-  refs.next.textContent = state.level < 20 ? "Next level →" : "Continue →";
+  const isBest = !isWeak && (!old || score.value > old.value || (score.value === old.value && score.accuracy > old.accuracy));
+
+  if (!isWeak) {
+    saved.completed[key()] = true;
+    if (isBest) saved.best[key()] = score;
+    saved.recent = { kind: "practice", mode: state.mode, level: state.level, value: stats.wpm, accuracy: stats.accuracy, unit: "WPM", errors: getErrorEntries().slice(0, 5), at: Date.now() };
+    refs.celebrationEyebrow.textContent = "Level complete";
+    refs.celebrationTitle.textContent = isBest ? "A brand-new personal best!" : "That was lovely!";
+    refs.celebrationCopy.textContent = stats.wpm + " WPM at " + stats.accuracy + "% accuracy. " + (isBest ? "Your garden is growing!" : "Every repeat makes you steadier.");
+    refs.next.textContent = state.level < 20 ? "Next level →" : "Continue →";
+  } else {
+    saved.recent = { kind: "weak", value: stats.wpm, accuracy: stats.accuracy, unit: "WPM", errors: getErrorEntries().slice(0, 5), at: Date.now() };
+    refs.celebrationEyebrow.textContent = "Weak-key workout complete";
+    refs.celebrationTitle.textContent = "Your weak spots got a little stronger. 🌱";
+    refs.celebrationCopy.textContent = stats.wpm + " WPM at " + stats.accuracy + "% accuracy. Review the patterns above, then run the workout again when you're ready.";
+    refs.next.textContent = "Practice again →";
+  }
+
   refs.celebration.hidden = false; refreshStats(); setBest(); renderErrorAnalysis(); updateNav(); save();
 }
 function finishDaily() {
