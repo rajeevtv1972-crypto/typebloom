@@ -34,6 +34,23 @@
           <button class="mode-tab" type="button" data-mode="intermediate" role="tab" aria-selected="false"><i>🌤</i><span><b>Intermediate</b><small>Find your flow</small></span></button>
           <button class="mode-tab" type="button" data-mode="advanced" role="tab" aria-selected="false"><i>🚀</i><span><b>Advanced</b><small>Stretch your speed</small></span></button>
         </div>
+
+        <section class="daily-mini" aria-labelledby="dailyHeading">
+          <div class="daily-mini-head">
+            <div><p class="eyebrow">🌸 Daily challenge</p><strong id="dailyHeading">Today's Challenge</strong></div>
+            <span id="dailyDifficulty" class="daily-difficulty">—</span>
+          </div>
+          <p id="dailyStatus" class="daily-status">60 seconds · aim for 95%+ accuracy.</p>
+          <div class="daily-mini-stats">
+            <span>🔥 <b id="dailyStreak">0</b> streak</span>
+            <span>🏆 <b id="dailyBest">—</b></span>
+            <span>◎ <b id="dailyAccuracy">—</b></span>
+            <span>30d <b id="daily30">0/30</b></span>
+          </div>
+          <div id="dailyHistory" class="daily-history" aria-label="Last 7 daily challenges"></div>
+          <button id="dailyButton" class="daily-button" type="button">Start today's challenge →</button>
+        </section>
+
         <div class="section-title"><p class="eyebrow" id="levelHeading">Beginner levels</p><span id="completionCount">0 / 20</span></div>
         <div id="levelGrid" class="level-grid" aria-label="Available practice levels"></div>
         <section class="test-studio" aria-labelledby="timedHeading">
