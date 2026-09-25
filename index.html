@@ -48,6 +48,17 @@
         </div>
       </div>
 
+      <section class="daily-home-card" aria-labelledby="dailyHomeHeading">
+        <div class="daily-home-copy">
+          <p class="eyebrow">🌸 A new challenge every day</p>
+          <h2 id="dailyHomeHeading">Today's Challenge</h2>
+          <p>60 seconds. A randomly chosen difficulty. A fresh passage built for today. Reach <strong>95%+ accuracy</strong> to keep your streak alive.</p>
+          <div class="daily-home-meta"><span>🔥 <b id="homeDailyStreak">0</b> day streak</span><span>🏆 <b id="homeDailyBest">—</b> best WPM</span><span>30d <b id="homeDaily30">0/30</b></span></div>
+          <a class="begin-button daily-home-button" href="typing.html?daily=1">Start today's challenge <span aria-hidden="true">→</span></a>
+        </div>
+        <div class="daily-home-art" aria-hidden="true"><span>🌱</span><b>60s</b><small>random daily passage</small></div>
+      </section>
+
       <section class="publisher-content" aria-labelledby="typingGuideTitle">
         <div class="publisher-copy">
           <p class="eyebrow">Typing practice guide</p>
@@ -118,6 +129,22 @@
     applyTheme(next);
     localStorage.setItem("typebloom-theme",next);
   });
+})();
+</script>
+    <script>
+(function(){
+  const key="typebloom-progress-v2";
+  function load(){try{return JSON.parse(localStorage.getItem(key))||{};}catch(e){return{};}}
+  function dateKey(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+  const saved=load(), history=saved.dailyHistory||{}, today=dateKey(new Date());
+  let anchor=new Date(), streak=0;
+  if(!history[today]?.completed){anchor.setDate(anchor.getDate()-1);if(!history[dateKey(anchor)]?.completed)anchor=null;}
+  if(anchor){while(history[dateKey(anchor)]?.completed){streak++;anchor.setDate(anchor.getDate()-1);}}
+  let best=0; Object.values(history).forEach(v=>{best=Math.max(best,Number(v?.bestWpm)||0);});
+  let wins30=0; const c=new Date();
+  for(let i=0;i<30;i++){const d=new Date(c);d.setDate(c.getDate()-i);if(history[dateKey(d)]?.completed)wins30++;}
+  const s=document.getElementById("homeDailyStreak"),b=document.getElementById("homeDailyBest"),w=document.getElementById("homeDaily30");
+  if(s)s.textContent=streak; if(b)b.textContent=best||"—"; if(w)w.textContent=wins30+"/30";
 })();
 </script>
   </body>
