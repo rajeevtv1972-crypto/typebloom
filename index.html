@@ -19,7 +19,7 @@
     <div class="glow glow-a"></div>
     <div class="glow glow-b"></div>
     <header class="topbar">
-      <a class="brand" href="main.html" id="brandHome" aria-label="TypeBloom home">
+      <a class="brand" href="index.html" id="brandHome" aria-label="TypeBloom home">
         <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 48 48" role="img"><path d="M14 7c7 1 11 5 11 12-7 0-11-4-11-12Z" fill="currentColor"/><path d="M25 7c7 1 11 5 11 12-7 0-11-4-11-12Z" fill="currentColor" opacity=".72"/><rect x="6" y="20" width="36" height="19" rx="6" fill="none" stroke="currentColor" stroke-width="3"/><path d="M13 27h3m4 0h3m4 0h3m4 0h2M13 33h22" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>
         Type<span>Bloom</span>
       </a>
@@ -30,23 +30,126 @@
       </div>
     </header>
     <section id="landingPage" class="landing-page" aria-labelledby="landingTitle">
+
       <div class="landing-hero">
         <div class="landing-copy">
-          <p class="eyebrow">A calmer way to get faster</p>
-          <h1 id="landingTitle">Begin your<br /><em>typing journey.</em></h1>
-          <p class="landing-lede">Build a natural rhythm with friendly levels, focused timed tests, and progress that stays right on your device.</p>
+          <p class="eyebrow">🌱 A calmer way to get faster</p>
+          <h1 id="landingTitle">Turn your typing<br /><em>into a skill.</em></h1>
+          <p class="landing-lede">Practice with focused challenges, measure your speed in real time, and build a typing rhythm that gets better one session at a time.</p>
+
           <div class="landing-actions">
-            <a id="beginButton" class="begin-button" href="typing.html">Let's begin <span aria-hidden="true">→</span></a>
-            <a class="learn-link" href="#howItWorks">See how it works <span aria-hidden="true">↓</span></a>
+            <a id="beginButton" class="begin-button" href="typing.html">Start Typing <span aria-hidden="true">→</span></a>
+            <a class="learn-link demo-jump-link" href="#speedDemo">Try the 15-second demo <span aria-hidden="true">↓</span></a>
           </div>
-          <div class="trust-row"><span>✓ No account needed</span><span>✓ Your progress stays local</span><span>✓ Free to begin</span></div>
+
+          <div class="hero-stats" aria-label="Your TypeBloom snapshot">
+            <article class="hero-stat">
+              <span>⚡</span>
+              <div><strong id="homeWpm">—</strong><small>Best WPM</small></div>
+            </article>
+            <article class="hero-stat">
+              <span>◎</span>
+              <div><strong id="homeAccuracy">—</strong><small>Best accuracy</small></div>
+            </article>
+            <article class="hero-stat">
+              <span>🔥</span>
+              <div><strong id="homeStreak">0</strong><small>Day streak</small></div>
+            </article>
+          </div>
+
+          <div class="trust-row"><span>✓ No account needed</span><span>✓ Progress stays local</span><span>✓ Free to start</span></div>
         </div>
-        <div class="hero-garden" aria-hidden="true">
+
+        <div class="hero-garden">
           <div class="sun-disc"></div><div class="leaf leaf-one"></div><div class="leaf leaf-two"></div>
+          <div class="hero-floating-card card-speed"><span>⚡</span><b id="heroLiveWpm">72</b><small>WPM target</small></div>
+          <div class="hero-floating-card card-accuracy"><span>◎</span><b>97%</b><small>accuracy goal</small></div>
           <div class="hero-keyboard"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><b></b></div>
-          <div class="hero-note note-one">5 → 100 words</div><div class="hero-note note-two">grow at your pace</div>
+          <div class="hero-note note-one">beginner → advanced</div><div class="hero-note note-two">practice • test • improve</div>
         </div>
       </div>
+
+      <section id="speedDemo" class="speed-demo-section" aria-labelledby="speedDemoTitle">
+        <div class="speed-demo-intro">
+          <p class="eyebrow">⌨ How fast can you type?</p>
+          <h2 id="speedDemoTitle">Try a tiny challenge before you commit.</h2>
+          <p>Type the passage below for 15 seconds. Your timer starts with the first keypress, and your live WPM and accuracy update as you type.</p>
+          <div class="mini-feature-row">
+            <span>⏱ 15 seconds</span><span>⚡ Live WPM</span><span>◎ Live accuracy</span>
+          </div>
+        </div>
+
+        <div class="speed-demo-card">
+          <div class="speed-demo-head">
+            <div><p class="eyebrow">Live typing demo</p><strong id="demoStatus">Ready when you are.</strong></div>
+            <button id="demoReset" class="demo-reset" type="button">↻ New passage</button>
+          </div>
+          <div class="demo-prompt" id="demoPrompt">Loading a fresh passage…</div>
+          <label class="sr-only" for="demoInput">Type the demo passage</label>
+          <textarea id="demoInput" rows="3" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="Click here and start typing…"></textarea>
+          <div class="demo-bottom">
+            <span id="demoTimer">15s</span>
+            <span id="demoWpm">0 WPM</span>
+            <span id="demoAccuracy">100% accuracy</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="progress-snapshot" aria-labelledby="progressSnapshotTitle">
+        <div class="snapshot-heading">
+          <div>
+            <p class="eyebrow">📈 Your progress</p>
+            <h2 id="progressSnapshotTitle">A quick look at your best scores</h2>
+          </div>
+          <a class="outline-button" href="typing.html">Open full practice →</a>
+        </div>
+        <div class="snapshot-grid">
+          <article class="snapshot-card">
+            <span class="snapshot-icon">🏆</span>
+            <div><small>Best overall WPM</small><strong id="snapshotWpm">—</strong><p id="snapshotWpmMeta">Complete a test to set your benchmark.</p></div>
+          </article>
+          <article class="snapshot-card">
+            <span class="snapshot-icon">🎯</span>
+            <div><small>Best accuracy</small><strong id="snapshotAccuracy">—</strong><p id="snapshotAccuracyMeta">Your most accurate recorded result.</p></div>
+          </article>
+          <article class="snapshot-card">
+            <span class="snapshot-icon">🌱</span>
+            <div><small>Last practice</small><strong id="snapshotLast">Beginner · Level 1</strong><p id="snapshotLastMeta">Your current starting point.</p></div>
+          </article>
+          <article class="snapshot-card">
+            <span class="snapshot-icon">🌸</span>
+            <div><small>Daily challenge</small><strong id="snapshotDaily">Ready</strong><p id="snapshotDailyMeta">Come back tomorrow for a fresh passage.</p></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="progression-section" aria-labelledby="progressionTitle">
+        <div class="progression-heading">
+          <p class="eyebrow">🌿 Your practice path</p>
+          <h2 id="progressionTitle">From first keystrokes to confident speed.</h2>
+          <p>Start where you are, move at your own pace, and let the difficulty grow with you.</p>
+        </div>
+        <div class="progression-grid">
+          <article class="progression-card beginner-card">
+            <div class="progression-number">01</div><span>🌱 Beginner</span>
+            <h3>Build the basics</h3>
+            <p>Short passages help you learn a relaxed rhythm while accuracy stays the priority.</p>
+            <a href="typing.html" class="progression-link">Start beginner →</a>
+          </article>
+          <article class="progression-card intermediate-card">
+            <div class="progression-number">02</div><span>🌤 Intermediate</span>
+            <h3>Find your flow</h3>
+            <p>Longer sentences, punctuation, numbers, and more variety help your hands stay steady.</p>
+            <a href="typing.html" class="progression-link">Build your flow →</a>
+          </article>
+          <article class="progression-card advanced-card">
+            <div class="progression-number">03</div><span>🚀 Advanced</span>
+            <h3>Stretch your speed</h3>
+            <p>Dense text, symbols, code-like passages, and precision challenges put your skill to work.</p>
+            <a href="typing.html" class="progression-link">Take the challenge →</a>
+          </article>
+        </div>
+      </section>
 
       <section class="daily-home-card" aria-labelledby="dailyHomeHeading">
         <div class="daily-home-copy">
@@ -145,6 +248,149 @@
   for(let i=0;i<30;i++){const d=new Date(c);d.setDate(c.getDate()-i);if(history[dateKey(d)]?.completed)wins30++;}
   const s=document.getElementById("homeDailyStreak"),b=document.getElementById("homeDailyBest"),w=document.getElementById("homeDaily30");
   if(s)s.textContent=streak; if(b)b.textContent=best||"—"; if(w)w.textContent=wins30+"/30";
+})();
+</script>
+
+    <script>
+(function(){
+  const root=document.documentElement;
+  const toggle=document.getElementById("themeToggle");
+  const icon=document.getElementById("themeIcon");
+  const saved=localStorage.getItem("typebloom-theme")||"light";
+  function applyTheme(theme){
+    root.dataset.theme=theme;
+    icon.textContent=theme==="dark"?"☀":"☾";
+    toggle.setAttribute("aria-label",theme==="dark"?"Switch to light theme":"Switch to dark theme");
+  }
+  applyTheme(saved);
+  toggle.addEventListener("click",function(){
+    const next=root.dataset.theme==="dark"?"light":"dark";
+    applyTheme(next);
+    localStorage.setItem("typebloom-theme",next);
+  });
+})();
+</script>
+    <script>
+(function(){
+  const key="typebloom-progress-v2";
+  const demoPrompts=[
+    "A calm rhythm makes typing feel lighter, clearer, and much more natural.",
+    "Read a little ahead, keep your hands relaxed, and let accuracy lead the pace.",
+    "Small practice sessions add up when you return with focus, patience, and curiosity.",
+    "Good typing is not only speed; it is confidence, control, and clean communication."
+  ];
+
+  function load(){
+    try{return JSON.parse(localStorage.getItem(key))||{};}catch(e){return{};}
+  }
+  function dateKey(d){
+    return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  }
+  function dailyStreak(history){
+    let anchor=new Date(), streak=0;
+    if(!history[dateKey(anchor)]?.completed){
+      anchor.setDate(anchor.getDate()-1);
+      if(!history[dateKey(anchor)]?.completed) return 0;
+    }
+    while(history[dateKey(anchor)]?.completed){
+      streak++;
+      anchor.setDate(anchor.getDate()-1);
+    }
+    return streak;
+  }
+  function snapshot(){
+    const saved=load(), best=saved.best||{}, history=saved.dailyHistory||{};
+    let bestWpm=0,bestAccuracy=0;
+    Object.entries(best).forEach(([name,value])=>{
+      const numeric=Number(value?.value)||0, accuracy=Number(value?.accuracy)||0;
+      if(!name.startsWith("cpm-")) bestWpm=Math.max(bestWpm,numeric);
+      bestAccuracy=Math.max(bestAccuracy,accuracy);
+    });
+
+    const streak=dailyStreak(history);
+    const today=dateKey(new Date());
+    const todayDone=Boolean(history[today]?.completed);
+    const lastMode=saved.lastMode||"beginner";
+    const lastLevel=Number(saved.lastLevel)||1;
+
+    const set=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value;};
+    set("homeWpm",bestWpm?bestWpm+" WPM":"—");
+    set("homeAccuracy",bestAccuracy?bestAccuracy+"%":"—");
+    set("homeStreak",streak);
+    set("snapshotWpm",bestWpm?bestWpm+" WPM":"—");
+    set("snapshotAccuracy",bestAccuracy?bestAccuracy+"%":"—");
+    set("snapshotLast",lastMode.charAt(0).toUpperCase()+lastMode.slice(1)+" · Level "+lastLevel);
+    set("snapshotWpmMeta",bestWpm?"Your highest saved WPM across practice and speed tests.":"Complete a test to set your benchmark.");
+    set("snapshotAccuracyMeta",bestAccuracy?"Best accuracy saved on this browser.":"Your most accurate recorded result will appear here.");
+    set("snapshotLastMeta",saved.lastMode?"Your last selected practice level.":"Start your first challenge to begin.");
+    set("snapshotDaily",todayDone?"Completed ✓":"Ready");
+    set("snapshotDailyMeta",todayDone?"Nice work — your streak is alive.":"60 seconds · 95%+ accuracy to complete.");
+  }
+
+  const promptEl=document.getElementById("demoPrompt"), input=document.getElementById("demoInput");
+  const timerEl=document.getElementById("demoTimer"), wpmEl=document.getElementById("demoWpm"), accEl=document.getElementById("demoAccuracy");
+  const statusEl=document.getElementById("demoStatus"), resetEl=document.getElementById("demoReset");
+  let demoText="",startedAt=0,interval=null,finished=false;
+
+  function correctCount(text,target){
+    let correct=0;
+    Array.from(text).forEach((ch,i)=>{if(ch===target[i])correct++;});
+    return correct;
+  }
+  function choosePrompt(){
+    demoText=demoPrompts[Math.floor(Math.random()*demoPrompts.length)];
+    Array.from(demoText);
+    promptEl.innerHTML="";
+    Array.from(demoText).forEach(ch=>{
+      const s=document.createElement("span");
+      s.textContent=ch;
+      promptEl.appendChild(s);
+    });
+  }
+  function updateDemo(){
+    const now=startedAt?Math.min(15,(Date.now()-startedAt)/1000):0;
+    const typed=input.value, correct=correctCount(typed,demoText);
+    const accuracy=typed.length?Math.round(correct/typed.length*100):100;
+    const wpm=now?Math.max(0,Math.round((correct/5)/(now/60))):0;
+    timerEl.textContent=Math.max(0,Math.ceil(15-now))+"s";
+    wpmEl.textContent=wpm+" WPM";
+    accEl.textContent=accuracy+"% accuracy";
+    Array.from(promptEl.children).forEach((s,i)=>{
+      s.className=i<typed.length?(typed[i]===demoText[i]?"correct":"incorrect"):(i===typed.length?"current":"");
+    });
+    if(startedAt && now>=15) finishDemo();
+  }
+  function finishDemo(){
+    if(finished)return;
+    finished=true;
+    clearInterval(interval);interval=null;input.disabled=true;
+    updateDemo();
+    statusEl.textContent="Nice run! Ready to beat it?";
+  }
+  function startDemo(){
+    if(startedAt||finished)return;
+    startedAt=Date.now();
+    statusEl.textContent="You're in — keep the rhythm.";
+    interval=setInterval(updateDemo,100);
+  }
+  function resetDemo(){
+    clearInterval(interval);interval=null;
+    startedAt=0;finished=false;input.disabled=false;input.value="";
+    statusEl.textContent="Ready when you are.";
+    choosePrompt();updateDemo();input.focus();
+  }
+  input.addEventListener("input",function(){
+    if(input.value.length&&!startedAt)startDemo();
+    updateDemo();
+  });
+  input.addEventListener("keydown",function(e){
+    if(e.key==="Tab")e.preventDefault();
+  });
+  resetEl.addEventListener("click",resetDemo);
+  choosePrompt();updateDemo();
+
+  snapshot();
+  window.addEventListener("storage",snapshot);
 })();
 </script>
   </body>
