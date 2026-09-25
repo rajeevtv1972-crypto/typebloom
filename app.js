@@ -120,6 +120,167 @@ const modeInfo = {
   advanced: { label: "Advanced", tips: ["Stay light on the keys and precise.", "Trust your rhythm when symbols appear.", "Smooth corrections beat frantic speed."] }
 };
 
+
+const dailyWordBanks = {
+  beginner: "apple bright calm chair cloud dance dream easy family flower fresh friend gentle happy hello home jump kind laugh light little morning music nature open peace play quiet read smile soft sunny table today together tree warm water welcome window world young".split(" "),
+  intermediate: "accuracy balance browser challenge character comfortable confidence consistent creative detail effort focused keyboard language improve practice progress punctuation reliable rhythm sentence steady technique thoughtful typing useful version workflow".split(" "),
+  advanced: "accuracy algorithm character composition consistent context precision performance sequence technical variable keyboard syntax function optimize reliable iteration benchmark displacement architecture debugging efficiency workflow complex punctuation protocol response structure parameter return output execute".split(" ")
+};
+const dailySpecialTokens = {
+  beginner: ["today", "again", "together"],
+  intermediate: ["accuracy", "focus", "practice", "rhythm"],
+  advanced: ["2026", "98%", "WPM", "CPM", "=>", "{}", "[]", "$", "@", "#", "&&"]
+};
+function dailyDateKey(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return year + "-" + month + "-" + day;
+}
+function dailyDateObject(dateKey) {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+function dailySeed(dateKey) {
+  let hash = 2166136261;
+  for (const char of dateKey) {
+    hash ^= char.charCodeAt(0);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
+function makeSeededRandom(seed) {
+  let value = seed >>> 0;
+  return function() {
+    value = (Math.imul(value, 1664525) + 1013904223) >>> 0;
+    return value / 4294967296;
+  };
+}
+function buildDailyText(difficulty, random) {
+  const bank = dailyWordBanks[difficulty];
+  const specials = dailySpecialTokens[difficulty];
+  const targetWords = difficulty === "beginner" ? 210 : difficulty === "intermediate" ? 230 : 250;
+  const words = [];
+  let sentenceLength = 0;
+  for (let index = 0; index < targetWords; index += 1) {
+    let word = bank[Math.floor(random() * bank.length)];
+    if (difficulty === "advanced" && random() > 0.9) {
+      word = specials[Math.floor(random() * specials.length)];
+    } else if (random() > 0.96) {
+      word = word + (difficulty === "beginner" ? "," : random() > 0.5 ? "," : ":");
+    }
+    words.push(word);
+    sentenceLength += 1;
+    if (sentenceLength >= 9 + Math.floor(random() * 7)) {
+      words[words.length - 1] = words[words.length - 1].replace(/[,:;!?]+$/, "") + (difficulty === "advanced" && random() > 0.72 ? "!" : ".");
+      sentenceLength = 0;
+    }
+  }
+  let text = words.join(" ");
+  text = text.replace(/(^|[.!?] )([a-z])/g, (_, prefix, letter) => prefix + letter.toUpperCase());
+  return text;
+}
+function getDailyChallenge(dateKey = dailyDateKey()) {
+  const random = makeSeededRandom(dailySeed(dateKey));
+  const modes = ["beginner", "intermediate", "advanced"];
+  const difficulty = modes[Math.floor(random() * modes.length)];
+  const title = difficulty === "beginner" ? "Gentle garden run" : difficulty === "intermediate" ? "Find your flow" : "Precision sprint";
+  return {
+    date: dateKey,
+    difficulty,
+    label: modeInfo[difficulty]?.label || difficulty,
+    title,
+    seconds: 60,
+    targetAccuracy: 95,
+    text: buildDailyText(difficulty, random)
+  };
+}
+function getDailyHistory() {
+  if (!saved.dailyHistory || typeof saved.dailyHistory !== "object") saved.dailyHistory = {};
+  return saved.dailyHistory;
+}
+function getDailyStats() {
+  const history = getDailyHistory();
+  const today = dailyDateKey();
+  const todayDone = Boolean(history[today]?.completed);
+  const yesterdayDate = new Date();
+  yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+  const anchor = todayDone ? dailyDateObject(today) : (history[dailyDateKey(yesterdayDate)]?.completed ? yesterdayDate : null);
+  let streak = 0;
+  if (anchor) {
+    const cursor = new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate());
+    while (history[dailyDateKey(cursor)]?.completed) {
+      streak += 1;
+      cursor.setDate(cursor.getDate() - 1);
+    }
+  }
+  let bestWpm = 0;
+  let bestAccuracy = 0;
+  Object.values(history).forEach(result => {
+    if (!result) return;
+    if (result.bestWpm) bestWpm = Math.max(bestWpm, Number(result.bestWpm) || 0);
+    if (result.bestAccuracy) bestAccuracy = Math.max(bestAccuracy, Number(result.bestAccuracy) || 0);
+  });
+  const dayCells = [];
+  const cursor = new Date();
+  for (let index = 6; index >= 0; index -= 1) {
+    const day = new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate() - index);
+    const keyName = dailyDateKey(day);
+    dayCells.push({ key: keyName, completed: Boolean(history[keyName]?.completed), label: ["S","M","T","W","T","F","S"][day.getDay()] });
+  }
+  const wins30 = Array.from({ length: 30 }, (_, index) => {
+    const day = new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate() - index);
+    return Boolean(history[dailyDateKey(day)]?.completed);
+  }).filter(Boolean).length;
+  return { todayDone, streak, bestWpm, bestAccuracy, dayCells, wins30 };
+}
+function recordDailyResult(stats) {
+  const history = getDailyHistory();
+  const date = dailyDateKey();
+  const previous = history[date] || { attempts: 0, completed: false, bestWpm: 0, bestAccuracy: 0 };
+  const successful = stats.accuracy >= 95;
+  previous.attempts += 1;
+  previous.lastWpm = stats.wpm;
+  previous.lastAccuracy = stats.accuracy;
+  previous.completed = previous.completed || successful;
+  if (successful) {
+    previous.bestWpm = Math.max(Number(previous.bestWpm) || 0, stats.wpm);
+    previous.bestAccuracy = Math.max(Number(previous.bestAccuracy) || 0, stats.accuracy);
+  }
+  history[date] = previous;
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 90);
+  Object.keys(history).forEach(keyName => {
+    if (dailyDateObject(keyName) < cutoff) delete history[keyName];
+  });
+  saved.dailyHistory = history;
+  save();
+  return successful;
+}
+function renderDailySummary() {
+  if (!refs.dailyButton) return;
+  const challenge = getDailyChallenge();
+  const stats = getDailyStats();
+  if (refs.dailyDifficulty) refs.dailyDifficulty.textContent = challenge.label;
+  if (refs.dailyStreak) refs.dailyStreak.textContent = String(stats.streak);
+  if (refs.dailyBest) refs.dailyBest.textContent = stats.bestWpm ? stats.bestWpm + " WPM" : "—";
+  if (refs.dailyAccuracy) refs.dailyAccuracy.textContent = stats.bestAccuracy ? stats.bestAccuracy + "%" : "—";
+  if (refs.daily30) refs.daily30.textContent = stats.wins30 + "/30";
+  if (refs.dailyStatus) refs.dailyStatus.textContent = stats.todayDone ? "Completed today ✓ Come back tomorrow." : "60 seconds · aim for 95%+ accuracy.";
+  refs.dailyButton.textContent = stats.todayDone ? "Improve today's score →" : "Start today's challenge →";
+  if (refs.dailyHistory) {
+    refs.dailyHistory.replaceChildren();
+    stats.dayCells.forEach(day => {
+      const cell = document.createElement("span");
+      cell.className = "daily-history-dot" + (day.completed ? " done" : "");
+      cell.textContent = day.label;
+      cell.title = day.key + (day.completed ? " · completed" : " · not completed");
+      cell.setAttribute("aria-label", day.key + (day.completed ? " completed" : " not completed"));
+      refs.dailyHistory.append(cell);
+    });
+  }
+}
+
 const $ = selector => document.querySelector(selector);
 const refs = {
   modeTabs: document.querySelectorAll(".mode-tab"),
@@ -135,7 +296,8 @@ const refs = {
   celebrationTitle: $("#celebrationTitle"), celebrationCopy: $("#celebrationCopy"), next: $("#nextButton"),
   themeToggle: $("#themeToggle"), themeIcon: $("#themeIcon"),
   infoDialog: $("#infoDialog"), dialogTitle: $("#dialogTitle"), dialogBody: $("#dialogBody"),
-  dialogClose: $("#dialogClose"), panelButtons: document.querySelectorAll("[data-panel]"), copyrightYear: $("#copyrightYear")
+  dialogClose: $("#dialogClose"), panelButtons: document.querySelectorAll("[data-panel]"), copyrightYear: $("#copyrightYear"),
+  dailyButton: $("#dailyButton"), dailyDifficulty: $("#dailyDifficulty"), dailyStreak: $("#dailyStreak"), dailyBest: $("#dailyBest"), dailyAccuracy: $("#dailyAccuracy"), daily30: $("#daily30"), dailyStatus: $("#dailyStatus"), dailyHistory: $("#dailyHistory")
 };
 
 const storageKey = "typebloom-progress-v2";
@@ -147,14 +309,15 @@ let state = {
 };
 
 function loadSaved() {
-  try { return JSON.parse(localStorage.getItem(storageKey)) || { completed: {}, best: {}, lastMode: "beginner", lastLevel: 1 }; }
-  catch { return { completed: {}, best: {}, lastMode: "beginner", lastLevel: 1 }; }
+  try { return JSON.parse(localStorage.getItem(storageKey)) || { completed: {}, best: {}, lastMode: "beginner", lastLevel: 1, dailyHistory: {} }; }
+  catch { return { completed: {}, best: {}, lastMode: "beginner", lastLevel: 1, dailyHistory: {} }; }
 }
 function save() {
   saved.lastMode = state.mode; saved.lastLevel = state.level;
   localStorage.setItem(storageKey, JSON.stringify(saved));
 }
 function currentText() {
+  if (state.kind === "daily") return state.dailyChallenge?.text || getDailyChallenge().text;
   if (state.kind === "practice") {
     const seed = levels[state.mode][state.level - 1][2];
     const goal = practiceWordsPerLevel[state.mode] * state.level;
@@ -166,6 +329,7 @@ function currentText() {
   return timedPrompts[state.promptIndex % timedPrompts.length];
 }
 function key() {
+  if (state.kind === "daily") return "daily";
   return state.kind === "practice" ? state.mode + "-" + state.level : state.testType + "-" + state.duration;
 }
 function formatTime(seconds) {
@@ -292,10 +456,15 @@ function updateNav() {
     const active = state.kind === "practice" && tab.dataset.mode === state.mode;
     tab.classList.toggle("active", active); tab.setAttribute("aria-selected", String(active));
   });
-  refs.testTypes.forEach(tab => tab.classList.toggle("active", state.kind !== "practice" && tab.dataset.test === state.testType));
-  renderLevels(); renderDurations();
+  refs.testTypes.forEach(tab => tab.classList.toggle("active", state.kind !== "practice" && state.kind !== "daily" && tab.dataset.test === state.testType));
+  renderLevels(); renderDurations(); renderDailySummary();
 }
 function setBest() {
+  if (state.kind === "daily") {
+    const stats = getDailyStats();
+    refs.best.innerHTML = stats.bestWpm ? stats.bestWpm + " <small>WPM</small>" : "—";
+    return;
+  }
   const result = saved.best[key()];
   const unit = state.kind === "cpm" ? "CPM" : "WPM";
   refs.best.innerHTML = result ? result.value + " <small>" + unit + "</small>" : "—";
@@ -305,6 +474,25 @@ function cleanChallenge() {
   stopTimer(); state.startedAt = null; state.elapsed = 0; state.finished = false; state.totalTyped = 0; state.totalCorrect = 0; state.lineStarts = [0]; state.lineHeight = 0;
   refs.input.value = ""; refs.input.disabled = false; refs.input.placeholder = "Click here and begin typing...";
   refs.celebration.hidden = true; refs.next.disabled = false;
+}
+function renderDaily() {
+  state.kind = "daily";
+  state.duration = 1;
+  state.dailyChallenge = getDailyChallenge();
+  cleanChallenge();
+  const challenge = state.dailyChallenge;
+  refs.meta.textContent = "Daily Challenge · 60 seconds";
+  refs.title.textContent = challenge.title;
+  refs.chip.textContent = challenge.label + " · 95%+ accuracy";
+  refs.tip.textContent = challenge.difficulty === "beginner" ? "Keep it calm and accurate." : challenge.difficulty === "intermediate" ? "Find a steady rhythm." : "Stay precise under pressure.";
+  refs.inputHelp.textContent = "Today's passage changes at midnight. You have 60 seconds and need 95%+ accuracy to complete the challenge.";
+  refs.primaryName.textContent = "Speed"; refs.timeName.textContent = "Time left";
+  renderPrompt(true); refreshStats(); setBest(); updateNav(); save();
+  renderDailySummary();
+}
+function selectDaily() {
+  renderDaily();
+  requestAnimationFrame(() => refs.input.focus());
 }
 function renderPractice() {
   const item = levels[state.mode][state.level - 1];
@@ -341,8 +529,10 @@ function startTimer() {
   if (state.startedAt) return;
   state.startedAt = Date.now();
   state.timer = setInterval(() => {
-    if (state.kind !== "practice" && statValues().elapsed >= state.duration * 60) finishTimed();
-    else refreshStats();
+    if (state.kind !== "practice" && statValues().elapsed >= state.duration * 60) {
+      if (state.kind === "daily") finishDaily();
+      else finishTimed();
+    } else refreshStats();
   }, 200);
 }
 function completePractice() {
@@ -357,6 +547,20 @@ function completePractice() {
   refs.celebrationCopy.textContent = stats.wpm + " WPM at " + stats.accuracy + "% accuracy. " + (isBest ? "Your garden is growing!" : "Every repeat makes you steadier.");
   refs.next.textContent = state.level < 20 ? "Next level →" : "Continue →";
   refs.celebration.hidden = false; refreshStats(); setBest(); updateNav(); save();
+}
+function finishDaily() {
+  if (state.finished) return;
+  state.finished = true; state.elapsed = Math.min(60, (Date.now() - state.startedAt) / 1000); stopTimer(); refs.input.disabled = true;
+  const stats = statValues();
+  const successful = recordDailyResult(stats);
+  const globalStats = getDailyStats();
+  refs.celebrationEyebrow.textContent = successful ? "Daily challenge complete" : "Daily challenge";
+  refs.celebrationTitle.textContent = successful ? "You kept the bloom alive! 🌸" : "So close — accuracy comes first.";
+  refs.celebrationCopy.textContent = successful
+    ? stats.wpm + " WPM at " + stats.accuracy + "% accuracy. " + globalStats.streak + "-day streak · best " + globalStats.bestWpm + " WPM."
+    : stats.wpm + " WPM at " + stats.accuracy + "% accuracy. Reach 95%+ accuracy to complete today's challenge.";
+  refs.next.textContent = successful ? "Try again →" : "Try again →";
+  refs.celebration.hidden = false; refreshStats(); setBest(); renderDailySummary(); save();
 }
 function finishTimed() {
   if (state.finished) return;
@@ -378,16 +582,17 @@ function nextPrompt() {
 function onTyping() {
   if (state.finished) return;
   if (refs.input.value.length && !state.startedAt) startTimer();
-  if (state.kind !== "practice" && state.startedAt && statValues().elapsed >= state.duration * 60) { finishTimed(); return; }
+  if (state.kind !== "practice" && state.startedAt && statValues().elapsed >= state.duration * 60) { if (state.kind === "daily") finishDaily(); else finishTimed(); return; }
   renderPrompt(); refreshStats();
   if (state.kind === "practice" && refs.input.value.length >= currentText().length) completePractice();
   if (state.kind !== "practice" && refs.input.value.length >= currentText().length) nextPrompt();
 }
 function reset() {
-  if (state.kind === "practice") renderPractice(); else renderTimed();
+  if (state.kind === "practice") renderPractice(); else if (state.kind === "daily") renderDaily(); else renderTimed();
   refs.input.focus();
 }
 function next() {
+  if (state.kind === "daily") { selectDaily(); return; }
   if (state.kind !== "practice") { selectTimed(state.testType, state.duration); return; }
   if (state.level < 20) selectPractice(state.mode, state.level + 1);
   else {
@@ -431,6 +636,7 @@ function closeInfoPanel() {
 }
 
 refs.modeTabs.forEach(tab => tab.addEventListener("click", () => selectPractice(tab.dataset.mode, 1)));
+if (refs.dailyButton) refs.dailyButton.addEventListener("click", selectDaily);
 refs.testTypes.forEach(tab => tab.addEventListener("click", () => selectTimed(tab.dataset.test, state.duration)));
 refs.input.addEventListener("input", onTyping); refs.reset.addEventListener("click", reset); refs.next.addEventListener("click", next);
 refs.themeToggle.addEventListener("click", () => setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
@@ -441,5 +647,6 @@ if (refs.infoDialog) refs.infoDialog.addEventListener("cancel", closeInfoPanel);
 window.addEventListener("resize", () => { if (!state.finished) renderPrompt(true); });
 setTheme(localStorage.getItem("typebloom-theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
 const savedLevel = Math.min(20, Math.max(1, state.level));
-selectPractice(state.mode, isLevelUnlocked(state.mode, savedLevel) ? savedLevel : 1);
+if (new URLSearchParams(window.location.search).get("daily") === "1") selectDaily();
+else selectPractice(state.mode, isLevelUnlocked(state.mode, savedLevel) ? savedLevel : 1);
 if (refs.copyrightYear) refs.copyrightYear.textContent = String(new Date().getFullYear());
