@@ -585,7 +585,8 @@ function onTyping() {
   if (state.kind !== "practice" && state.startedAt && statValues().elapsed >= state.duration * 60) { if (state.kind === "daily") finishDaily(); else finishTimed(); return; }
   renderPrompt(); refreshStats();
   if (state.kind === "practice" && refs.input.value.length >= currentText().length) completePractice();
-  if (state.kind !== "practice" && refs.input.value.length >= currentText().length) nextPrompt();
+  if (state.kind === "daily" && refs.input.value.length >= currentText().length) finishDaily();
+  else if (state.kind !== "practice" && state.kind !== "daily" && refs.input.value.length >= currentText().length) nextPrompt();
 }
 function reset() {
   if (state.kind === "practice") renderPractice(); else if (state.kind === "daily") renderDaily(); else renderTimed();
