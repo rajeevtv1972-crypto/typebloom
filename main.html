@@ -278,12 +278,25 @@
     set("homeStreak",streak);
     set("snapshotWpm",bestWpm?bestWpm+" WPM":"—");
     set("snapshotAccuracy",bestAccuracy?bestAccuracy+"%":"—");
-    set("snapshotLast",lastMode.charAt(0).toUpperCase()+lastMode.slice(1)+" · Level "+lastLevel);
+    const recent=saved.recent||null;
+    if(recent){
+      const recentLabel=recent.kind==="practice" ? (String(recent.mode||"").charAt(0).toUpperCase()+String(recent.mode||"").slice(1)+" · Level "+(recent.level||1)) : recent.kind==="daily" ? "Daily Challenge" : (recent.kind==="speed" ? "Speed Test · "+recent.duration+" min" : "CPM Test · "+recent.duration+" min");
+      set("snapshotLast",recent.value+" "+(recent.unit||"WPM"));
+      set("snapshotLastMeta",recentLabel+" · "+recent.accuracy+"% accuracy.");
+    } else {
+      set("snapshotLast","No result yet");
+      set("snapshotLastMeta",saved.lastMode ? ("Last selected: "+lastMode.charAt(0).toUpperCase()+lastMode.slice(1)+" · Level "+lastLevel+".") : "Complete a challenge to see it here.");
+    }
     set("snapshotWpmMeta",bestWpm?"Your highest saved WPM across practice and speed tests.":"Complete a test to set your benchmark.");
     set("snapshotAccuracyMeta",bestAccuracy?"Best accuracy saved on this browser.":"Your most accurate recorded result will appear here.");
     set("snapshotLastMeta",saved.lastMode?"Your last selected practice level.":"Start your first challenge to begin.");
     set("snapshotDaily",todayDone?"Completed ✓":"Ready");
     set("snapshotDailyMeta",todayDone?"Nice work — your streak is alive.":"60 seconds · 95%+ accuracy to complete.");
+    set("homeDailyStreak",streak);
+    set("homeDailyBest",Number(history[today]?.bestWpm||0) ? Number(history[today].bestWpm)+" WPM" : "—");
+    let wins30=0; const dayCursor=new Date();
+    for(let i=0;i<30;i++){const d=new Date(dayCursor);d.setDate(dayCursor.getDate()-i);if(history[dateKey(d)]?.completed)wins30++;}
+    set("homeDaily30",wins30+"/30");
   }
 
   const promptEl=document.getElementById("demoPrompt"), input=document.getElementById("demoInput");
