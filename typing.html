@@ -16,13 +16,13 @@
     <div class="glow glow-a"></div>
     <div class="glow glow-b"></div>
     <header class="topbar">
-      <a class="brand" href="main.html" aria-label="TypeBloom home">
+      <a class="brand" href="index.html" aria-label="TypeBloom home">
         <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 48 48" role="img"><path d="M14 7c7 1 11 5 11 12-7 0-11-4-11-12Z" fill="currentColor"/><path d="M25 7c7 1 11 5 11 12-7 0-11-4-11-12Z" fill="currentColor" opacity=".72"/><rect x="6" y="20" width="36" height="19" rx="6" fill="none" stroke="currentColor" stroke-width="3"/><path d="M13 27h3m4 0h3m4 0h3m4 0h2M13 33h22" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>
         Type<span>Bloom</span>
       </a>
       <div class="top-actions">
         <p>✦ Tiny steps, big progress</p>
-        <a class="home-button" href="main.html">Home</a>
+        <a class="home-button" href="index.html">Home</a>
         <button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch to dark theme"><span id="themeIcon">☾</span></button>
       </div>
     </header>
@@ -71,6 +71,25 @@
         </section>
         <section class="stats-row" aria-label="Live typing statistics"><article class="stat"><i class="mint">⚡</i><div><p id="primaryStatName">Speed</p><strong id="primaryStat">0 <small>WPM</small></strong></div></article><article class="stat"><i class="peach">◎</i><div><p>Accuracy</p><strong id="accuracyStat">100<small>%</small></strong></div></article><article class="stat"><i class="lavender">◷</i><div><p id="timeStatName">Time</p><strong id="timeStat">0:00</strong></div></article><article class="stat best-stat"><i class="yellow">★</i><div><p>Personal best</p><strong id="bestStat">—</strong></div></article></section>
         <section id="celebration" class="celebration" aria-live="polite" hidden><i>✦</i><div><p class="eyebrow" id="celebrationEyebrow">Level complete</p><h3 id="celebrationTitle">That was lovely!</h3><p id="celebrationCopy"></p></div><button id="nextButton" class="next-button" type="button">Next level →</button></section>
+
+        <section id="errorAnalysis" class="error-analysis" aria-labelledby="errorAnalysisTitle" hidden>
+          <div class="error-analysis-head">
+            <div>
+              <p class="eyebrow">🧠 Learn from the mistakes</p>
+              <h3 id="errorAnalysisTitle">Your weak spots</h3>
+            </div>
+            <span class="error-analysis-badge">Top 5</span>
+          </div>
+          <p id="errorSummary" class="error-summary"></p>
+          <div id="errorList" class="error-list" aria-label="Most common typing mistakes"></div>
+          <div class="weak-practice-box">
+            <div>
+              <strong>Turn mistakes into practice.</strong>
+              <p>Your next workout will be generated around the keys you missed most often.</p>
+            </div>
+            <button id="weakPracticeButton" class="weak-practice-button" type="button">Practice these weak spots →</button>
+          </div>
+        </section>
         <p class="workspace-footer"><span>⌘</span> Accuracy first, speed follows naturally.</p>
       </section>
     </main>
