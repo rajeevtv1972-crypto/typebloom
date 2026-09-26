@@ -645,13 +645,13 @@ function completePractice() {
     saved.recent = { kind: "practice", mode: state.mode, level: state.level, value: stats.wpm, accuracy: stats.accuracy, unit: "WPM", errors: getErrorEntries().slice(0, 5), at: Date.now() };
     refs.celebrationEyebrow.textContent = "Level complete";
     refs.celebrationTitle.textContent = isBest ? "A brand-new personal best!" : "That was lovely!";
-    refs.celebrationCopy.textContent = stats.wpm + " WPM at " + stats.accuracy + "% accuracy. " + (isBest ? "Your garden is growing!" : "Every repeat makes you steadier.");
+    refs.celebrationCopy.textContent = stats.wpm + " WPM at " + stats.accuracy + "% accuracy. " + (isBest ? "Your garden is growing!" : "Every repeat makes you steadier.") + " Press Enter to continue.";
     refs.next.textContent = state.level < 20 ? "Next level →" : "Continue →";
   } else {
     saved.recent = { kind: "weak", value: stats.wpm, accuracy: stats.accuracy, unit: "WPM", errors: getErrorEntries().slice(0, 5), at: Date.now() };
     refs.celebrationEyebrow.textContent = "Weak-key workout complete";
     refs.celebrationTitle.textContent = "Your weak spots got a little stronger. 🌱";
-    refs.celebrationCopy.textContent = stats.wpm + " WPM at " + stats.accuracy + "% accuracy. Review the patterns above, then run the workout again when you're ready.";
+    refs.celebrationCopy.textContent = stats.wpm + " WPM at " + stats.accuracy + "% accuracy. Review the patterns above, then press Enter to practice again.";
     refs.next.textContent = "Practice again →";
   }
 
@@ -669,8 +669,8 @@ function finishDaily() {
   refs.celebrationEyebrow.textContent = successful ? "Daily challenge complete" : "Daily challenge";
   refs.celebrationTitle.textContent = successful ? "You kept the bloom alive! 🌸" : "So close — accuracy comes first.";
   refs.celebrationCopy.textContent = successful
-    ? stats.wpm + " WPM at " + stats.accuracy + "% accuracy. " + globalStats.streak + "-day streak · best " + globalStats.bestWpm + " WPM."
-    : stats.wpm + " WPM at " + stats.accuracy + "% accuracy. Reach 95%+ accuracy to complete today's challenge.";
+    ? stats.wpm + " WPM at " + stats.accuracy + "% accuracy. " + globalStats.streak + "-day streak · best " + globalStats.bestWpm + " WPM. Press Enter to try again."
+    : stats.wpm + " WPM at " + stats.accuracy + "% accuracy. Reach 95%+ accuracy to complete today's challenge. Press Enter to try again.";
   refs.next.textContent = successful ? "Try again →" : "Try again →";
   refs.celebration.hidden = false; refreshStats(); setBest(); renderErrorAnalysis(); renderDailySummary(); save();
   requestAnimationFrame(() => refs.next.focus());
@@ -684,7 +684,7 @@ function finishTimed() {
   if (isBest) saved.best[key()] = { value, accuracy: stats.accuracy }; saved.recent = { kind: state.testType, duration: state.duration, value, accuracy: stats.accuracy, unit, errors: getErrorEntries().slice(0, 5), at: Date.now() };
   refs.celebrationEyebrow.textContent = state.duration + "-minute test complete";
   refs.celebrationTitle.textContent = isBest ? "A fresh personal best!" : "Strong, steady work!";
-  refs.celebrationCopy.textContent = value + " " + unit + " at " + stats.accuracy + "% accuracy. " + (isBest ? "That is a lovely new benchmark." : "Try it again when you feel ready.");
+  refs.celebrationCopy.textContent = value + " " + unit + " at " + stats.accuracy + "% accuracy. " + (isBest ? "That is a lovely new benchmark." : "Try it again when you feel ready.") + " Press Enter to continue.";
   refs.next.textContent = "Try another duration →"; refs.celebration.hidden = false; refreshStats(); setBest(); renderErrorAnalysis(); save();
   requestAnimationFrame(() => refs.next.focus());
 }
