@@ -656,6 +656,7 @@ function completePractice() {
   }
 
   refs.celebration.hidden = false; refreshStats(); setBest(); renderErrorAnalysis(); updateNav(); save();
+  requestAnimationFrame(() => refs.next.focus());
 }
 function finishDaily() {
   if (state.finished) return;
@@ -672,6 +673,7 @@ function finishDaily() {
     : stats.wpm + " WPM at " + stats.accuracy + "% accuracy. Reach 95%+ accuracy to complete today's challenge.";
   refs.next.textContent = successful ? "Try again →" : "Try again →";
   refs.celebration.hidden = false; refreshStats(); setBest(); renderErrorAnalysis(); renderDailySummary(); save();
+  requestAnimationFrame(() => refs.next.focus());
 }
 function finishTimed() {
   if (state.finished) return;
@@ -684,6 +686,7 @@ function finishTimed() {
   refs.celebrationTitle.textContent = isBest ? "A fresh personal best!" : "Strong, steady work!";
   refs.celebrationCopy.textContent = value + " " + unit + " at " + stats.accuracy + "% accuracy. " + (isBest ? "That is a lovely new benchmark." : "Try it again when you feel ready.");
   refs.next.textContent = "Try another duration →"; refs.celebration.hidden = false; refreshStats(); setBest(); renderErrorAnalysis(); save();
+  requestAnimationFrame(() => refs.next.focus());
 }
 function nextPrompt() {
   const target = currentText();
@@ -754,7 +757,14 @@ refs.modeTabs.forEach(tab => tab.addEventListener("click", () => selectPractice(
 if (refs.dailyButton) refs.dailyButton.addEventListener("click", selectDaily);
 if (refs.weakPracticeButton) refs.weakPracticeButton.addEventListener("click", () => { renderWeakPractice(); requestAnimationFrame(() => refs.input.focus()); });
 refs.testTypes.forEach(tab => tab.addEventListener("click", () => selectTimed(tab.dataset.test, state.duration)));
-refs.input.addEventListener("input", onTyping); refs.reset.addEventListener("click", reset); refs.next.addEventListener("click", next);
+refs.input.addEventListener("input", onTyping);
+refs.input.addEventListener("keydown", event => {
+  if (event.key === "Enter" && state.finished) {
+    event.preventDefault();
+    next();
+  }
+});
+refs.reset.addEventListener("click", reset); refs.next.addEventListener("click", next);
 refs.themeToggle.addEventListener("click", () => setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
 refs.panelButtons.forEach(button => button.addEventListener("click", () => openInfoPanel(button.dataset.panel)));
 if (refs.dialogClose) refs.dialogClose.addEventListener("click", closeInfoPanel);
