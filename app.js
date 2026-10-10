@@ -909,6 +909,7 @@ function cleanChallenge() {
   stopTimer(); state.startedAt = null; state.elapsed = 0; state.finished = false; state.totalTyped = 0; state.totalCorrect = 0; state.totalErrors = 0; state.errorMap = {}; state.lineStarts = [0]; state.lineHeight = 0;
   refs.input.value = ""; refs.input.disabled = false; refs.input.placeholder = "Click here and begin typing...";
   refs.celebration.hidden = true; refs.next.disabled = false; if (refs.errorAnalysis) refs.errorAnalysis.hidden = true;
+  if (refs.resultDetails) refs.resultDetails.hidden = true; if (refs.resultShareStatus) refs.resultShareStatus.textContent = "";
 }
 function renderDaily() {
   state.kind = "daily";
@@ -984,6 +985,7 @@ function startTimer() {
 }
 function completePractice() {
   if (state.finished) return;
+  const baseline = getSessionSummary();
   const isWeak = state.kind === "weak";
   collectCurrentErrors();
   state.finished = true; state.elapsed = (Date.now() - state.startedAt) / 1000; stopTimer(); refs.input.disabled = true;
@@ -1008,11 +1010,14 @@ function completePractice() {
     refs.next.textContent = "Practice again →";
   }
 
+  recordSession(stats, {kind: isWeak ? "weak" : "practice", label: isWeak ? "Weak-key workout" : modeInfo[state.mode].label + " · Level " + state.level});
+  showResultDetails(stats, baseline, {label: isWeak ? "Weak-key workout" : modeInfo[state.mode].label + " · Level " + state.level}, isBest, stats.wpm, "WPM");
   refs.celebration.hidden = false; refreshStats(); setBest(); renderErrorAnalysis(); updateNav(); save();
   requestAnimationFrame(() => refs.next.focus());
 }
 function finishDaily() {
   if (state.finished) return;
+  const baseline = getSessionSummary();
   collectCurrentErrors();
   state.finished = true; state.elapsed = Math.min(60, (Date.now() - state.startedAt) / 1000); stopTimer(); refs.input.disabled = true;
   const stats = statValues();
@@ -1025,11 +1030,14 @@ function finishDaily() {
     ? stats.wpm + " WPM at " + stats.accuracy + "% accuracy. " + globalStats.streak + "-day streak · best " + globalStats.bestWpm + " WPM. Press Enter to try again."
     : stats.wpm + " WPM at " + stats.accuracy + "% accuracy. Reach 95%+ accuracy to complete today's challenge. Press Enter to try again.";
   refs.next.textContent = successful ? "Try again →" : "Try again →";
+  recordSession(stats, {kind: "daily", label: "Daily Challenge"});
+  showResultDetails(stats, baseline, {label: "Daily Challenge"}, successful, stats.wpm, "WPM");
   refs.celebration.hidden = false; refreshStats(); setBest(); renderErrorAnalysis(); renderDailySummary(); save();
   requestAnimationFrame(() => refs.next.focus());
 }
 function finishTimed() {
   if (state.finished) return;
+  const baseline = getSessionSummary();
   collectCurrentErrors();
   state.finished = true; state.elapsed = state.duration * 60; stopTimer(); refs.input.disabled = true;
   const stats = statValues(); const isCpm = state.testType === "cpm"; const value = isCpm ? stats.cpm : stats.wpm; const unit = isCpm ? "CPM" : "WPM";
@@ -1038,7 +1046,10 @@ function finishTimed() {
   refs.celebrationEyebrow.textContent = state.duration + "-minute test complete";
   refs.celebrationTitle.textContent = isBest ? "A fresh personal best!" : "Strong, steady work!";
   refs.celebrationCopy.textContent = value + " " + unit + " at " + stats.accuracy + "% accuracy. " + (isBest ? "That is a lovely new benchmark." : "Try it again when you feel ready.") + " Press Enter to continue.";
-  refs.next.textContent = "Try another duration →"; refs.celebration.hidden = false; refreshStats(); setBest(); renderErrorAnalysis(); save();
+  refs.next.textContent = "Try another duration →";
+  recordSession(stats, {kind: state.testType, label: state.duration + "-minute " + (isCpm ? "CPM test" : "speed test")});
+  showResultDetails(stats, baseline, {label: state.duration + "-minute " + (isCpm ? "CPM test" : "speed test")}, isBest, value, unit);
+  refs.celebration.hidden = false; refreshStats(); setBest(); renderErrorAnalysis(); save();
   requestAnimationFrame(() => refs.next.focus());
 }
 function nextPrompt() {
@@ -1112,6 +1123,25 @@ refs.input.addEventListener("keydown", event => {
   }
 });
 refs.reset.addEventListener("click", reset); refs.next.addEventListener("click", next);
+let activeProgressRange = 7;
+if (refs.progressButton && refs.progressDialog) refs.progressButton.addEventListener("click", () => {
+  renderProgressDashboard(activeProgressRange);
+  if (typeof refs.progressDialog.showModal === "function") refs.progressDialog.showModal();
+  else refs.progressDialog.setAttribute("open", "");
+});
+if (refs.progressClose) refs.progressClose.addEventListener("click", () => {
+  if (refs.progressDialog && typeof refs.progressDialog.close === "function") refs.progressDialog.close();
+  else if (refs.progressDialog) refs.progressDialog.removeAttribute("open");
+});
+if (refs.progressDialog) {
+  refs.progressDialog.addEventListener("click", event => { if (event.target === refs.progressDialog && typeof refs.progressDialog.close === "function") refs.progressDialog.close(); });
+}
+if (refs.progressRanges) refs.progressRanges.forEach(button => button.addEventListener("click", () => {
+  activeProgressRange = Number(button.dataset.range) === 30 ? 30 : 7;
+  renderProgressDashboard(activeProgressRange);
+}));
+if (refs.shareResultButton) refs.shareResultButton.addEventListener("click", shareLatestResult);
+if (refs.downloadResultButton) refs.downloadResultButton.addEventListener("click", downloadResultCard);
 refs.panelButtons.forEach(button => button.addEventListener("click", () => openInfoPanel(button.dataset.panel)));
 if (refs.dialogClose) refs.dialogClose.addEventListener("click", closeInfoPanel);
 if (refs.infoDialog) refs.infoDialog.addEventListener("click", event => { if (event.target === refs.infoDialog) closeInfoPanel(); });
