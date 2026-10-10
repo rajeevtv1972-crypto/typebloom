@@ -379,6 +379,34 @@ const refs = {
   dailyButton: $("#dailyButton"), dailyDifficulty: $("#dailyDifficulty"), dailyStreak: $("#dailyStreak"), dailyBest: $("#dailyBest"), dailyAccuracy: $("#dailyAccuracy"), daily30: $("#daily30"), dailyStatus: $("#dailyStatus"), dailyHistory: $("#dailyHistory")
 };
 
+function setTheme(theme) {
+  const normalized = theme === "dark" ? "dark" : "light";
+  document.documentElement.dataset.theme = normalized;
+  try { localStorage.setItem("typebloom-theme", normalized); } catch (error) {}
+  const dark = normalized === "dark";
+  if (refs.themeIcon) refs.themeIcon.textContent = dark ? "☀" : "☾";
+  if (refs.themeToggle) refs.themeToggle.setAttribute("aria-label", dark ? "Switch to light theme" : "Switch to dark theme");
+}
+function getInitialTheme() {
+  try {
+    const savedTheme = localStorage.getItem("typebloom-theme");
+    if (savedTheme === "dark" || savedTheme === "light") return savedTheme;
+  } catch (error) {}
+  try {
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  } catch (error) {
+    return "light";
+  }
+}
+if (refs.themeToggle) {
+  refs.themeToggle.addEventListener("click", event => {
+    event.preventDefault();
+    const currentTheme = document.documentElement.dataset.theme;
+    setTheme(currentTheme === "dark" ? "light" : "dark");
+  });
+}
+setTheme(getInitialTheme());
+
 const storageKey = "typebloom-progress-v2";
 let saved = loadSaved();
 let state = {
@@ -720,12 +748,6 @@ function next() {
     else { refs.celebrationTitle.textContent = "You grew the whole garden!"; refs.celebrationCopy.textContent = "All 60 levels are complete. Pick any level to keep sharpening your rhythm."; refs.next.disabled = true; refs.next.textContent = "Garden complete ✦"; }
   }
 }
-function setTheme(theme) {
-  document.documentElement.dataset.theme = theme; localStorage.setItem("typebloom-theme", theme);
-  const dark = theme === "dark"; refs.themeIcon.textContent = dark ? "☀" : "☾";
-  refs.themeToggle.setAttribute("aria-label", dark ? "Switch to light theme" : "Switch to dark theme");
-}
-
 const infoPanels = {
   about: {
     title: "About TypeBloom",
@@ -765,13 +787,11 @@ refs.input.addEventListener("keydown", event => {
   }
 });
 refs.reset.addEventListener("click", reset); refs.next.addEventListener("click", next);
-refs.themeToggle.addEventListener("click", () => setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
 refs.panelButtons.forEach(button => button.addEventListener("click", () => openInfoPanel(button.dataset.panel)));
 if (refs.dialogClose) refs.dialogClose.addEventListener("click", closeInfoPanel);
 if (refs.infoDialog) refs.infoDialog.addEventListener("click", event => { if (event.target === refs.infoDialog) closeInfoPanel(); });
 if (refs.infoDialog) refs.infoDialog.addEventListener("cancel", closeInfoPanel);
 window.addEventListener("resize", () => { if (!state.finished) renderPrompt(true); });
-setTheme(localStorage.getItem("typebloom-theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
 const savedLevel = Math.min(20, Math.max(1, state.level));
 if (new URLSearchParams(window.location.search).get("daily") === "1") selectDaily();
 else selectPractice(state.mode, isLevelUnlocked(state.mode, savedLevel) ? savedLevel : 1);
