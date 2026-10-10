@@ -604,12 +604,12 @@ function renderProgressDashboard(days = 7) {
     button.classList.toggle("active", active);
     button.setAttribute("aria-pressed", String(active));
   });
-  if (refs.progressAverageWpm) refs.progressAverageWpm.textContent = data.currentWpm == null ? "—" : Math.round(data.currentWpm) + " WPM";
-  if (refs.progressAverageWpmMeta) refs.progressAverageWpmMeta.textContent = data.current.length + " session" + (data.current.length === 1 ? "" : "s") + " " + label;
-  if (refs.progressAverageAccuracy) refs.progressAverageAccuracy.textContent = data.currentAccuracy == null ? "—" : data.currentAccuracy.toFixed(1) + "%";
-  if (refs.progressAverageAccuracyMeta) refs.progressAverageAccuracyMeta.textContent = "Average across " + data.current.length + " recorded session" + (data.current.length === 1 ? "" : "s");
-  if (refs.progressPracticeTime) refs.progressPracticeTime.textContent = formatDurationLong(data.currentSeconds);
-  if (refs.progressPracticeTimeMeta) refs.progressPracticeTimeMeta.textContent = label;
+  if (refs.progressAverageWpm) refs.progressAverageWpm.textContent = data.allSummary.averageWpm == null ? "—" : Math.round(data.allSummary.averageWpm) + " WPM";
+  if (refs.progressAverageWpmMeta) refs.progressAverageWpmMeta.textContent = "Across " + data.allSummary.count + " recorded session" + (data.allSummary.count === 1 ? "" : "s") + " · all time";
+  if (refs.progressAverageAccuracy) refs.progressAverageAccuracy.textContent = data.allSummary.averageAccuracy == null ? "—" : data.allSummary.averageAccuracy.toFixed(1) + "%";
+  if (refs.progressAverageAccuracyMeta) refs.progressAverageAccuracyMeta.textContent = "Average across all recorded sessions";
+  if (refs.progressPracticeTime) refs.progressPracticeTime.textContent = formatDurationLong(data.totalSeconds);
+  if (refs.progressPracticeTimeMeta) refs.progressPracticeTimeMeta.textContent = "All-time total · " + formatDurationLong(data.currentSeconds) + " " + label;
   if (refs.progressCompletedLevels) refs.progressCompletedLevels.textContent = data.completed + " / 60";
   if (refs.progressCompletedLevelsMeta) refs.progressCompletedLevelsMeta.textContent = "Completed levels saved on this device";
   if (refs.progressRecordWpm) refs.progressRecordWpm.textContent = data.records.wpm ? data.records.wpm + " WPM" : "—";
