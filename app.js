@@ -781,9 +781,10 @@ function statValues() {
   const liveTyped = refs.input.value.length;
   const liveCorrect = typedCorrect(refs.input.value, target);
   const elapsed = state.finished ? state.elapsed : state.startedAt ? (Date.now() - state.startedAt) / 1000 : 0;
-  const speedElapsed = Math.max(1, elapsed);
   const typed = state.totalTyped + liveTyped;
   const correct = state.totalCorrect + liveCorrect;
+  // 15 characters/second is a generous net-speed ceiling for a result, guarding against pasted text or near-zero timers.
+  const speedElapsed = Math.max(1, elapsed, typed / 15);
   const accuracy = typed ? Math.round((correct / typed) * 100) : 100;
   const wpm = elapsed ? Math.max(0, Math.round((correct / 5) / (speedElapsed / 60))) : 0;
   const cpm = elapsed ? Math.max(0, Math.round(correct / (speedElapsed / 60))) : 0;
@@ -989,7 +990,7 @@ function completePractice() {
   const baseline = getSessionSummary();
   const isWeak = state.kind === "weak";
   collectCurrentErrors();
-  state.finished = true; state.elapsed = Math.max(1, (Date.now() - state.startedAt) / 1000); stopTimer(); refs.input.disabled = true;
+  state.finished = true; state.elapsed = Math.max(1, (Date.now() - state.startedAt) / 1000, refs.input.value.length / 15); stopTimer(); refs.input.disabled = true;
   const stats = statValues();
   const old = isWeak ? null : saved.best[key()];
   const score = { value: stats.wpm, accuracy: stats.accuracy };
@@ -1021,7 +1022,7 @@ function finishDaily() {
   const baseline = getSessionSummary();
   const previousDailyBest = getDailyStats().bestWpm;
   collectCurrentErrors();
-  state.finished = true; state.elapsed = Math.max(1, Math.min(60, (Date.now() - state.startedAt) / 1000)); stopTimer(); refs.input.disabled = true;
+  state.finished = true; state.elapsed = Math.max(1, Math.min(60, Math.max((Date.now() - state.startedAt) / 1000, refs.input.value.length / 15))); stopTimer(); refs.input.disabled = true;
   const stats = statValues();
   const successful = recordDailyResult(stats);
   const globalStats = getDailyStats();
