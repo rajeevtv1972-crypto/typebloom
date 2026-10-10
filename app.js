@@ -1018,6 +1018,7 @@ function completePractice() {
 function finishDaily() {
   if (state.finished) return;
   const baseline = getSessionSummary();
+  const previousDailyBest = getDailyStats().bestWpm;
   collectCurrentErrors();
   state.finished = true; state.elapsed = Math.min(60, (Date.now() - state.startedAt) / 1000); stopTimer(); refs.input.disabled = true;
   const stats = statValues();
@@ -1031,7 +1032,7 @@ function finishDaily() {
     : stats.wpm + " WPM at " + stats.accuracy + "% accuracy. Reach 95%+ accuracy to complete today's challenge. Press Enter to try again.";
   refs.next.textContent = successful ? "Try again →" : "Try again →";
   recordSession(stats, {kind: "daily", label: "Daily Challenge"});
-  showResultDetails(stats, baseline, {label: "Daily Challenge"}, successful, stats.wpm, "WPM");
+  showResultDetails(stats, baseline, {label: "Daily Challenge"}, stats.wpm > previousDailyBest, stats.wpm, "WPM");
   refs.celebration.hidden = false; refreshStats(); setBest(); renderErrorAnalysis(); renderDailySummary(); save();
   requestAnimationFrame(() => refs.next.focus());
 }
