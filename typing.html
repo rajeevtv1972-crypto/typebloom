@@ -33,6 +33,7 @@
       <div class="top-actions">
         <p>✦ Tiny steps, big progress</p>
         <a class="home-button" href="/">Home</a>
+        <button id="progressButton" class="home-button progress-open-button" type="button">Progress ↗</button>
         <button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch to dark theme"><span id="themeIcon">☾</span></button>
       </div>
     </header>
@@ -82,6 +83,25 @@
         <section class="stats-row" aria-label="Live typing statistics"><article class="stat"><i class="mint">⚡</i><div><p id="primaryStatName">Speed</p><strong id="primaryStat">0 <small>WPM</small></strong></div></article><article class="stat"><i class="peach">◎</i><div><p>Accuracy</p><strong id="accuracyStat">100<small>%</small></strong></div></article><article class="stat"><i class="lavender">◷</i><div><p id="timeStatName">Time</p><strong id="timeStat">0:00</strong></div></article><article class="stat best-stat"><i class="yellow">★</i><div><p>Personal best</p><strong id="bestStat">—</strong></div></article></section>
         <section id="celebration" class="celebration" aria-live="polite" hidden><i>✦</i><div><p class="eyebrow" id="celebrationEyebrow">Level complete</p><h3 id="celebrationTitle">That was lovely!</h3><p id="celebrationCopy"></p></div><button id="nextButton" class="next-button" type="button">Next level →</button></section>
 
+          <div id="resultDetails" class="result-details" hidden>
+            <div class="result-card" id="shareableResultCard">
+              <div class="result-card-brand"><span class="result-brand-mark">✿</span><span>TypeBloom <small>YOUR PRACTICE RESULT</small></span><span class="result-card-date" id="resultDate"></span></div>
+              <div class="result-card-head"><div><p id="resultLabel" class="eyebrow">Practice result</p><h4 id="resultHeadline">Nice work!</h4></div><span id="resultUnitBadge" class="result-unit-badge">WPM</span></div>
+              <div class="result-metric-grid">
+                <div class="result-metric result-metric-primary"><span>Typing speed</span><strong id="resultWpm">—</strong><small>WPM</small></div>
+                <div class="result-metric"><span>Accuracy</span><strong id="resultAccuracy">—</strong><small>percent correct</small></div>
+                <div class="result-metric"><span>Correct characters</span><strong id="resultCorrect">—</strong><small>characters</small></div>
+                <div class="result-metric"><span>Mistakes</span><strong id="resultErrors">—</strong><small>character mismatches</small></div>
+              </div>
+              <div class="result-card-footer"><span>Small steps. Real progress.</span><strong>typebloom-deg.pages.dev</strong></div>
+            </div>
+            <div class="result-insight-grid">
+              <div class="result-insight"><span class="result-insight-icon">📊</span><div><small>Compared with your average</small><strong id="resultAverage">Building your baseline…</strong></div></div>
+              <div class="result-insight"><span class="result-insight-icon">🌱</span><div><small>Today's standout</small><strong id="resultInsight">Every session is progress.</strong></div></div>
+            </div>
+            <div class="result-actions"><button id="shareResultButton" class="share-result-button" type="button">Share result ↗</button><span id="resultShareStatus" role="status" aria-live="polite"></span></div>
+          </div>
+
         <section id="errorAnalysis" class="error-analysis" aria-labelledby="errorAnalysisTitle" hidden>
           <div class="error-analysis-head">
             <div>
@@ -126,6 +146,34 @@
         <span class="footer-links"><button data-panel="about" type="button">About</button><a href="/privacy-policy">Privacy Policy</a><button data-panel="contact" type="button">Contact</button></span>
       </div>
     </footer>
+    <dialog id="progressDialog" class="progress-dialog" aria-labelledby="progressDialogTitle">
+      <div class="dialog-head progress-dialog-head">
+        <div><p class="eyebrow">Your personal practice data</p><h2 id="progressDialogTitle">Progress dashboard</h2><p class="progress-dialog-subtitle">Private to this browser. No account required.</p></div>
+        <button id="progressClose" type="button" aria-label="Close progress dashboard">×</button>
+      </div>
+      <div class="progress-dialog-body">
+        <div class="progress-range-tabs" role="group" aria-label="Progress graph range">
+          <button type="button" class="progress-range active" data-range="7" aria-pressed="true">Last 7 days</button>
+          <button type="button" class="progress-range" data-range="30" aria-pressed="false">Last 30 days</button>
+        </div>
+        <div class="progress-kpi-grid">
+          <article class="progress-kpi"><span>⚡ Average speed</span><strong id="progressAverageWpm">—</strong><small id="progressAverageWpmMeta">WPM across recorded sessions</small></article>
+          <article class="progress-kpi"><span>◎ Average accuracy</span><strong id="progressAverageAccuracy">—</strong><small id="progressAverageAccuracyMeta">Across recorded sessions</small></article>
+          <article class="progress-kpi"><span>◷ Practice time</span><strong id="progressPracticeTime">0m</strong><small id="progressPracticeTimeMeta">In selected period</small></article>
+          <article class="progress-kpi"><span>🌱 Levels completed</span><strong id="progressCompletedLevels">0 / 60</strong><small id="progressCompletedLevelsMeta">Saved on this device</small></article>
+        </div>
+        <div class="progress-chart-grid">
+          <section class="progress-chart-card"><div class="progress-chart-title"><div><p class="eyebrow">Speed trend</p><h3>Words per minute</h3></div><span id="progressWpmChange" class="progress-change">—</span></div><div id="progressWpmChart" class="progress-chart-visual" role="img" aria-label="Average words per minute by day"></div><p id="progressWpmNote" class="progress-chart-note"></p></section>
+          <section class="progress-chart-card"><div class="progress-chart-title"><div><p class="eyebrow">Accuracy trend</p><h3>Accuracy by day</h3></div><span id="progressAccuracyChange" class="progress-change">—</span></div><div id="progressAccuracyChart" class="progress-chart-visual" role="img" aria-label="Average typing accuracy by day"></div><p id="progressAccuracyNote" class="progress-chart-note"></p></section>
+        </div>
+        <div class="progress-bottom-grid">
+          <section class="progress-record-card"><p class="eyebrow">Personal records</p><h3>Your best numbers</h3><div class="progress-record-row"><span>Fastest WPM</span><strong id="progressRecordWpm">—</strong></div><div class="progress-record-row"><span>Best accuracy</span><strong id="progressRecordAccuracy">—</strong></div><div class="progress-record-row"><span>Completed levels</span><strong id="progressRecordLevels">0 / 60</strong></div></section>
+          <section class="progress-insight-card"><p class="eyebrow">What is improving?</p><h3 id="progressImprovementTitle">Your baseline starts here</h3><p id="progressImprovementCopy">Complete a few sessions to see how your speed and accuracy change over time.</p><div class="progress-period-summary"><span id="progressSessionsCount">0 sessions recorded</span><span id="progressBestStreak">Keep building your rhythm 🌱</span></div></section>
+        </div>
+        <p id="progressHistoryNote" class="progress-history-note">Progress history is stored only in this browser. New trend data is recorded when you complete a challenge or timed test.</p>
+      </div>
+    </dialog>
+
     <dialog id="infoDialog" class="info-dialog" aria-labelledby="dialogTitle">
       <div class="dialog-head">
         <h2 id="dialogTitle"></h2>
