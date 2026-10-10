@@ -88,7 +88,7 @@
               <div class="result-card-brand"><span class="result-brand-mark">✿</span><span>TypeBloom <small>YOUR PRACTICE RESULT</small></span><span class="result-card-date" id="resultDate"></span></div>
               <div class="result-card-head"><div><p id="resultLabel" class="eyebrow">Practice result</p><h4 id="resultHeadline">Nice work!</h4></div><span id="resultUnitBadge" class="result-unit-badge">WPM</span></div>
               <div class="result-metric-grid">
-                <div class="result-metric result-metric-primary"><span>Typing speed</span><strong id="resultWpm">—</strong><small>WPM</small></div>
+                <div class="result-metric result-metric-primary"><span>Typing speed</span><strong id="resultWpm">—</strong><small id="resultWpmUnit">WPM</small></div>
                 <div class="result-metric"><span>Accuracy</span><strong id="resultAccuracy">—</strong><small>percent correct</small></div>
                 <div class="result-metric"><span>Correct characters</span><strong id="resultCorrect">—</strong><small>characters</small></div>
                 <div class="result-metric"><span>Mistakes</span><strong id="resultErrors">—</strong><small>character mismatches</small></div>
@@ -99,7 +99,7 @@
               <div class="result-insight"><span class="result-insight-icon">📊</span><div><small>Compared with your average</small><strong id="resultAverage">Building your baseline…</strong></div></div>
               <div class="result-insight"><span class="result-insight-icon">🌱</span><div><small>Today's standout</small><strong id="resultInsight">Every session is progress.</strong></div></div>
             </div>
-            <div class="result-actions"><button id="shareResultButton" class="share-result-button" type="button">Share result ↗</button><span id="resultShareStatus" role="status" aria-live="polite"></span></div>
+            <div class="result-actions"><div class="result-action-buttons"><button id="shareResultButton" class="share-result-button" type="button">Share result ↗</button><button id="downloadResultButton" class="download-result-button" type="button">Download card ↓</button></div><span id="resultShareStatus" role="status" aria-live="polite"></span></div>
           </div>
 
         <section id="errorAnalysis" class="error-analysis" aria-labelledby="errorAnalysisTitle" hidden>
