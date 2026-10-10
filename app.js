@@ -374,6 +374,12 @@ const refs = {
   celebrationTitle: $("#celebrationTitle"), celebrationCopy: $("#celebrationCopy"), next: $("#nextButton"),
   errorAnalysis: $("#errorAnalysis"), errorSummary: $("#errorSummary"), errorList: $("#errorList"), weakPracticeButton: $("#weakPracticeButton"),
   themeToggle: $("#themeToggle"), themeIcon: $("#themeIcon"),
+  progressButton: $("#progressButton"), progressDialog: $("#progressDialog"), progressClose: $("#progressClose"), progressRanges: document.querySelectorAll(".progress-range"),
+  progressAverageWpm: $("#progressAverageWpm"), progressAverageWpmMeta: $("#progressAverageWpmMeta"), progressAverageAccuracy: $("#progressAverageAccuracy"), progressAverageAccuracyMeta: $("#progressAverageAccuracyMeta"),
+  progressPracticeTime: $("#progressPracticeTime"), progressPracticeTimeMeta: $("#progressPracticeTimeMeta"), progressCompletedLevels: $("#progressCompletedLevels"), progressCompletedLevelsMeta: $("#progressCompletedLevelsMeta"),
+  progressWpmChange: $("#progressWpmChange"), progressWpmChart: $("#progressWpmChart"), progressWpmNote: $("#progressWpmNote"), progressAccuracyChange: $("#progressAccuracyChange"), progressAccuracyChart: $("#progressAccuracyChart"), progressAccuracyNote: $("#progressAccuracyNote"),
+  progressRecordWpm: $("#progressRecordWpm"), progressRecordAccuracy: $("#progressRecordAccuracy"), progressRecordLevels: $("#progressRecordLevels"), progressImprovementTitle: $("#progressImprovementTitle"), progressImprovementCopy: $("#progressImprovementCopy"), progressSessionsCount: $("#progressSessionsCount"), progressBestStreak: $("#progressBestStreak"), progressHistoryNote: $("#progressHistoryNote"),
+  resultDetails: $("#resultDetails"), resultDate: $("#resultDate"), resultLabel: $("#resultLabel"), resultHeadline: $("#resultHeadline"), resultUnitBadge: $("#resultUnitBadge"), resultWpm: $("#resultWpm"), resultWpmUnit: $("#resultWpmUnit"), resultAccuracy: $("#resultAccuracy"), resultCorrect: $("#resultCorrect"), resultErrors: $("#resultErrors"), resultAverage: $("#resultAverage"), resultInsight: $("#resultInsight"), shareResultButton: $("#shareResultButton"), downloadResultButton: $("#downloadResultButton"), resultShareStatus: $("#resultShareStatus"),
   infoDialog: $("#infoDialog"), dialogTitle: $("#dialogTitle"), dialogBody: $("#dialogBody"),
   dialogClose: $("#dialogClose"), panelButtons: document.querySelectorAll("[data-panel]"), copyrightYear: $("#copyrightYear"),
   dailyButton: $("#dailyButton"), dailyDifficulty: $("#dailyDifficulty"), dailyStreak: $("#dailyStreak"), dailyBest: $("#dailyBest"), dailyAccuracy: $("#dailyAccuracy"), daily30: $("#daily30"), dailyStatus: $("#dailyStatus"), dailyHistory: $("#dailyHistory")
@@ -422,7 +428,326 @@ function loadSaved() {
 }
 function save() {
   saved.lastMode = state.mode; saved.lastLevel = state.level;
-  localStorage.setItem(storageKey, JSON.stringify(saved));
+  try { localStorage.setItem(storageKey, JSON.stringify(saved)); } catch (error) {}
+}
+if (!saved.completed || typeof saved.completed !== "object") saved.completed = {};
+if (!saved.best || typeof saved.best !== "object") saved.best = {};
+if (!saved.dailyHistory || typeof saved.dailyHistory !== "object") saved.dailyHistory = {};
+if (!Array.isArray(saved.sessions)) saved.sessions = [];
+
+function completedLevelCount() {
+  return Object.keys(saved.completed).filter(keyName => /^(beginner|intermediate|advanced)-\d+$/.test(keyName)).length;
+}
+function averageOf(items, field) {
+  const values = items.map(item => Number(item[field])).filter(value => Number.isFinite(value) && value >= 0);
+  return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null;
+}
+function getSessionSummary(items = saved.sessions) {
+  const sessions = items.filter(item => item && Number.isFinite(Number(item.at)));
+  return {
+    count: sessions.length,
+    averageWpm: averageOf(sessions, "wpm"),
+    averageAccuracy: averageOf(sessions, "accuracy"),
+    fastestWpm: sessions.reduce((best, item) => Math.max(best, Number(item.wpm) || 0), 0),
+    bestAccuracy: sessions.reduce((best, item) => Math.max(best, Number(item.accuracy) || 0), 0)
+  };
+}
+function recordSession(stats, details) {
+  const session = {
+    at: Date.now(),
+    kind: details.kind,
+    label: details.label,
+    wpm: Number(stats.wpm) || 0,
+    cpm: Number(stats.cpm) || 0,
+    accuracy: Number(stats.accuracy) || 0,
+    typed: Number(stats.typed) || 0,
+    correct: Number(stats.correct) || 0,
+    errors: Number(state.totalErrors) || 0,
+    seconds: Math.max(0, Number(state.elapsed) || 0),
+    duration: state.duration,
+    mode: state.mode,
+    level: state.level
+  };
+  saved.sessions = (Array.isArray(saved.sessions) ? saved.sessions : []).concat(session).slice(-500);
+  return session;
+}
+function localDateKey(date) {
+  return date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" + String(date.getDate()).padStart(2, "0");
+}
+function formatDurationLong(seconds) {
+  const total = Math.max(0, Math.round(Number(seconds) || 0));
+  const hours = Math.floor(total / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  if (hours) return hours + "h " + minutes + "m";
+  if (minutes) return minutes + "m";
+  return total + "s";
+}
+function maxStoredRecords() {
+  const bests = Object.entries(saved.best || {}).filter(([keyName]) => !keyName.startsWith("cpm-")).map(([, entry]) => entry || {});
+  const daily = Object.values(saved.dailyHistory || {});
+  return {
+    wpm: Math.max(0, ...bests.map(entry => Number(entry.value) || 0), ...daily.map(entry => Number(entry.bestWpm) || 0), ...saved.sessions.map(entry => Number(entry.wpm) || 0)),
+    accuracy: Math.max(0, ...bests.map(entry => Number(entry.accuracy) || 0), ...daily.map(entry => Number(entry.bestAccuracy) || 0), ...saved.sessions.map(entry => Number(entry.accuracy) || 0))
+  };
+}
+function buildProgressData(days) {
+  const today = new Date();
+  const start = new Date(today.getFullYear(), today.getMonth(), today.getDate() - days + 1);
+  const previousStart = new Date(today.getFullYear(), today.getMonth(), today.getDate() - (days * 2) + 1);
+  const sessions = (saved.sessions || []).filter(item => item && Number.isFinite(Number(item.at)));
+  const current = sessions.filter(item => item.at >= start.getTime() && item.at < new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).getTime());
+  const previous = sessions.filter(item => item.at >= previousStart.getTime() && item.at < start.getTime());
+  const buckets = [];
+  for (let index = days - 1; index >= 0; index -= 1) {
+    const date = new Date(today.getFullYear(), today.getMonth(), today.getDate() - index);
+    const keyName = localDateKey(date);
+    const matching = current.filter(item => localDateKey(new Date(item.at)) === keyName);
+    buckets.push({
+      key: keyName,
+      label: days === 7 ? date.toLocaleDateString(undefined, { weekday: "short" }) : (index % 5 === 0 || index === 0 ? date.toLocaleDateString(undefined, { month: "numeric", day: "numeric" }) : ""),
+      shortDate: date.toLocaleDateString(undefined, { month: "short", day: "numeric" }),
+      count: matching.length,
+      avgWpm: averageOf(matching, "wpm"),
+      avgAccuracy: averageOf(matching, "accuracy")
+    });
+  }
+  const records = maxStoredRecords();
+  const allSummary = getSessionSummary(sessions);
+  return {
+    days, buckets, current, previous,
+    currentWpm: averageOf(current, "wpm"),
+    currentAccuracy: averageOf(current, "accuracy"),
+    previousWpm: averageOf(previous, "wpm"),
+    previousAccuracy: averageOf(previous, "accuracy"),
+    currentSeconds: current.reduce((sum, item) => sum + (Number(item.seconds) || 0), 0),
+    records,
+    allSummary,
+    completed: completedLevelCount(),
+    totalSeconds: sessions.reduce((sum, item) => sum + (Number(item.seconds) || 0), 0)
+  };
+}
+function drawProgressChart(container, buckets, field, kind) {
+  if (!container) return;
+  container.replaceChildren();
+  const values = buckets.filter(item => Number.isFinite(item[field]));
+  if (!values.length) {
+    const empty = document.createElement("div");
+    empty.className = "progress-chart-empty";
+    empty.textContent = "Complete your next session to start this chart.";
+    container.append(empty);
+    return;
+  }
+  const ns = "http://www.w3.org/2000/svg";
+  const width = 600, height = 205, left = 42, right = 14, top = 12, bottom = 31;
+  const chartWidth = width - left - right, chartHeight = height - top - bottom;
+  const maximum = kind === "accuracy" ? 100 : Math.max(10, Math.ceil(Math.max(...values.map(item => item[field])) / 10) * 10);
+  const minimum = 0;
+  const svg = document.createElementNS(ns, "svg");
+  svg.setAttribute("viewBox", "0 0 " + width + " " + height);
+  svg.setAttribute("role", "img");
+  svg.setAttribute("aria-label", kind === "accuracy" ? "Daily average accuracy" : "Daily average words per minute");
+  const add = (tag, attrs, textValue) => {
+    const element = document.createElementNS(ns, tag);
+    Object.entries(attrs || {}).forEach(([name, value]) => element.setAttribute(name, String(value)));
+    if (textValue != null) element.textContent = textValue;
+    svg.append(element);
+    return element;
+  };
+  for (let tick = 0; tick <= 4; tick += 1) {
+    const value = maximum - (maximum - minimum) * tick / 4;
+    const y = top + chartHeight * tick / 4;
+    add("line", {x1:left,y1:y,x2:width-right,y2:y,class:"progress-chart-gridline"});
+    add("text", {x:left-9,y:y+4,"text-anchor":"end",class:"progress-chart-axis-label"}, Math.round(value) + (kind === "accuracy" ? "%" : ""));
+  }
+  const pointFor = (item) => {
+    const index = buckets.indexOf(item);
+    return {
+      x: left + (buckets.length <= 1 ? chartWidth / 2 : index * chartWidth / (buckets.length - 1)),
+      y: top + chartHeight * (1 - (item[field] - minimum) / (maximum - minimum))
+    };
+  };
+  const pathPoints = [];
+  buckets.forEach((item, index) => {
+    const x = left + (buckets.length <= 1 ? chartWidth / 2 : index * chartWidth / (buckets.length - 1));
+    if (index === 0 || index === buckets.length - 1 || (buckets.length === 7) || (buckets.length === 30 && index % 5 === 0)) {
+      add("text", {x,y:height-9,"text-anchor":"middle",class:"progress-chart-axis-label"}, item.label || item.shortDate);
+    }
+    if (Number.isFinite(item[field])) {
+      const point = pointFor(item);
+      pathPoints.push({...point,item});
+    }
+  });
+  if (pathPoints.length > 1) {
+    add("path", {d:pathPoints.map((point,index)=>(index ? "L" : "M")+point.x.toFixed(2)+" "+point.y.toFixed(2)).join(" "),class:"progress-chart-line "+(kind === "accuracy" ? "accuracy-line" : "wpm-line")});
+  }
+  pathPoints.forEach(point => {
+    const circle = add("circle", {cx:point.x,cy:point.y,r:4,class:"progress-chart-point "+(kind === "accuracy" ? "accuracy-point" : "wpm-point"),tabindex:0});
+    const title = document.createElementNS(ns,"title");
+    title.textContent = point.item.shortDate + ": " + Math.round(point.item[field]) + (kind === "accuracy" ? "% accuracy" : " WPM") + " · " + point.item.count + " session" + (point.item.count === 1 ? "" : "s");
+    circle.append(title);
+  });
+  container.append(svg);
+}
+function formatChange(current, previous, unit) {
+  if (current == null) return "No data yet";
+  if (previous == null) return "New baseline";
+  const difference = current - previous;
+  const prefix = difference > 0 ? "+" : "";
+  const value = unit === "pp" ? difference.toFixed(1) + " pp" : (previous ? prefix + ((difference / previous) * 100).toFixed(0) + "%" : (current ? "New baseline" : "0%"));
+  return unit === "pp" ? prefix + value : value;
+}
+function renderProgressDashboard(days = 7) {
+  const data = buildProgressData(days);
+  const label = "in the last " + days + " days";
+  if (refs.progressRanges) refs.progressRanges.forEach(button => {
+    const active = Number(button.dataset.range) === days;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+  if (refs.progressAverageWpm) refs.progressAverageWpm.textContent = data.currentWpm == null ? "—" : Math.round(data.currentWpm) + " WPM";
+  if (refs.progressAverageWpmMeta) refs.progressAverageWpmMeta.textContent = data.current.length + " session" + (data.current.length === 1 ? "" : "s") + " " + label;
+  if (refs.progressAverageAccuracy) refs.progressAverageAccuracy.textContent = data.currentAccuracy == null ? "—" : data.currentAccuracy.toFixed(1) + "%";
+  if (refs.progressAverageAccuracyMeta) refs.progressAverageAccuracyMeta.textContent = "Average across " + data.current.length + " recorded session" + (data.current.length === 1 ? "" : "s");
+  if (refs.progressPracticeTime) refs.progressPracticeTime.textContent = formatDurationLong(data.currentSeconds);
+  if (refs.progressPracticeTimeMeta) refs.progressPracticeTimeMeta.textContent = label;
+  if (refs.progressCompletedLevels) refs.progressCompletedLevels.textContent = data.completed + " / 60";
+  if (refs.progressCompletedLevelsMeta) refs.progressCompletedLevelsMeta.textContent = "Completed levels saved on this device";
+  if (refs.progressRecordWpm) refs.progressRecordWpm.textContent = data.records.wpm ? data.records.wpm + " WPM" : "—";
+  if (refs.progressRecordAccuracy) refs.progressRecordAccuracy.textContent = data.records.accuracy ? data.records.accuracy + "%" : "—";
+  if (refs.progressRecordLevels) refs.progressRecordLevels.textContent = data.completed + " / 60";
+  if (refs.progressWpmChange) refs.progressWpmChange.textContent = formatChange(data.currentWpm, data.previousWpm, "%");
+  if (refs.progressAccuracyChange) refs.progressAccuracyChange.textContent = formatChange(data.currentAccuracy, data.previousAccuracy, "pp");
+  drawProgressChart(refs.progressWpmChart, data.buckets, "avgWpm", "wpm");
+  drawProgressChart(refs.progressAccuracyChart, data.buckets, "avgAccuracy", "accuracy");
+  if (refs.progressWpmNote) refs.progressWpmNote.textContent = valuesNote(data.buckets, "avgWpm", "WPM");
+  if (refs.progressAccuracyNote) refs.progressAccuracyNote.textContent = valuesNote(data.buckets, "avgAccuracy", "% accuracy");
+  if (refs.progressSessionsCount) refs.progressSessionsCount.textContent = data.current.length + " session" + (data.current.length === 1 ? "" : "s") + " " + label;
+  const daily = getDailyStats();
+  if (refs.progressBestStreak) refs.progressBestStreak.textContent = "Daily streak: " + daily.streak + " day" + (daily.streak === 1 ? "" : "s");
+  if (refs.progressImprovementTitle && refs.progressImprovementCopy) {
+    if (!data.current.length) {
+      refs.progressImprovementTitle.textContent = "Your baseline starts here";
+      refs.progressImprovementCopy.textContent = "Complete a challenge or timed test to begin building your private progress history.";
+    } else if (!data.previous.length) {
+      refs.progressImprovementTitle.textContent = "Your first trend is underway";
+      refs.progressImprovementCopy.textContent = "Once you've practised in an earlier period, TypeBloom can compare your average speed and accuracy to measure improvement.";
+    } else {
+      const speedChange = data.previousWpm ? ((data.currentWpm - data.previousWpm) / data.previousWpm) * 100 : 0;
+      const accuracyChange = data.currentAccuracy - data.previousAccuracy;
+      if (speedChange >= 0 && speedChange >= accuracyChange) {
+        refs.progressImprovementTitle.textContent = speedChange > 0 ? "Speed is your standout" : "Your speed is holding steady";
+        refs.progressImprovementCopy.textContent = "Average speed " + (speedChange > 0 ? "increased " + speedChange.toFixed(0) + "%" : "is steady") + " compared with the previous " + days + "-day period. Accuracy changed " + (accuracyChange > 0 ? "+" : "") + accuracyChange.toFixed(1) + " percentage points.";
+      } else {
+        refs.progressImprovementTitle.textContent = accuracyChange > 0 ? "Accuracy is your standout" : "Keep building consistency";
+        refs.progressImprovementCopy.textContent = "Average accuracy changed " + (accuracyChange > 0 ? "+" : "") + accuracyChange.toFixed(1) + " percentage points compared with the previous period. Average speed changed " + (speedChange > 0 ? "+" : "") + speedChange.toFixed(0) + "%.";
+      }
+    }
+  }
+  if (refs.progressHistoryNote) {
+    refs.progressHistoryNote.textContent = data.current.length
+      ? "Showing " + data.current.length + " completed session" + (data.current.length === 1 ? "" : "s") + " from " + label + ". New session history is stored only in this browser; older best scores and levels stay preserved."
+      : "No sessions in this period yet. Older personal records and completed levels are preserved, while daily trend charts begin recording with your next completed session.";
+  }
+}
+function valuesNote(buckets, field, suffix) {
+  const recorded = buckets.filter(item => Number.isFinite(item[field])).length;
+  return recorded + " of " + buckets.length + " days have results · daily averages shown in " + suffix;
+}
+function showResultDetails(stats, baseline, details, isBest, primaryValue, primaryUnit) {
+  if (!refs.resultDetails) return;
+  refs.resultDetails.hidden = false;
+  if (refs.resultDate) refs.resultDate.textContent = new Date().toLocaleDateString() + " · " + formatTime(state.elapsed);
+  if (refs.resultLabel) refs.resultLabel.textContent = details.label;
+  if (refs.resultHeadline) refs.resultHeadline.textContent = isBest ? "New personal best!" : "A little more progress";
+  if (refs.resultUnitBadge) refs.resultUnitBadge.textContent = primaryUnit;
+  if (refs.resultWpm) refs.resultWpm.textContent = String(primaryValue);
+  if (refs.resultWpmUnit) refs.resultWpmUnit.textContent = primaryUnit;
+  if (refs.resultAccuracy) refs.resultAccuracy.textContent = stats.accuracy + "%";
+  if (refs.resultCorrect) refs.resultCorrect.textContent = (Number(stats.correct) || 0).toLocaleString();
+  if (refs.resultErrors) refs.resultErrors.textContent = String(state.totalErrors);
+  if (refs.resultAverage) {
+    if (baseline.count && baseline.averageWpm != null) {
+      const delta = stats.wpm - baseline.averageWpm;
+      const pct = baseline.averageWpm ? (delta / baseline.averageWpm) * 100 : 0;
+      refs.resultAverage.textContent = "Your average: " + Math.round(baseline.averageWpm) + " WPM · " + (delta > 0 ? "+" : "") + pct.toFixed(0) + "% this session";
+    } else refs.resultAverage.textContent = "This is your first recorded result";
+  }
+  if (refs.resultInsight) {
+    if (!baseline.count) refs.resultInsight.textContent = "You've set your starting benchmark. Keep going!";
+    else {
+      const wpmDelta = baseline.averageWpm == null ? 0 : stats.wpm - baseline.averageWpm;
+      const accuracyDelta = baseline.averageAccuracy == null ? 0 : stats.accuracy - baseline.averageAccuracy;
+      if (isBest) refs.resultInsight.textContent = "New personal best — you've raised your own bar.";
+      else if (wpmDelta > 0 && wpmDelta >= accuracyDelta) refs.resultInsight.textContent = "Your speed was above your average today.";
+      else if (accuracyDelta > 0) refs.resultInsight.textContent = "Your accuracy was above your average today.";
+      else refs.resultInsight.textContent = "Keep practising — consistency creates progress.";
+    }
+  }
+  if (refs.resultShareStatus) refs.resultShareStatus.textContent = "";
+}
+function buildShareText() {
+  const label = refs.resultLabel ? refs.resultLabel.textContent : "Typing result";
+  const speed = refs.resultWpm ? refs.resultWpm.textContent : "—";
+  const unit = refs.resultWpmUnit ? refs.resultWpmUnit.textContent : "WPM";
+  const accuracy = refs.resultAccuracy ? refs.resultAccuracy.textContent : "—";
+  const correct = refs.resultCorrect ? refs.resultCorrect.textContent : "—";
+  const errors = refs.resultErrors ? refs.resultErrors.textContent : "—";
+  return "TypeBloom · " + label + "\n" + speed + " " + unit + " · " + accuracy + " accuracy\n" + correct + " correct characters · " + errors + " mistakes\nPractise at https://typebloom-deg.pages.dev/";
+}
+async function shareLatestResult() {
+  const shareData = { title: "My TypeBloom result", text: buildShareText(), url: "https://typebloom-deg.pages.dev/" };
+  if (navigator.share) {
+    try { await navigator.share(shareData); if (refs.resultShareStatus) refs.resultShareStatus.textContent = "Ready to share 🌱"; return; }
+    catch (error) { if (error && error.name === "AbortError") return; }
+  }
+  try {
+    await navigator.clipboard.writeText(shareData.text);
+    if (refs.resultShareStatus) refs.resultShareStatus.textContent = "Result copied — paste it anywhere.";
+  } catch (error) {
+    if (refs.resultShareStatus) refs.resultShareStatus.textContent = "Sharing isn't available here. You can select and copy the result card text.";
+  }
+}
+function downloadResultCard() {
+  const canvas = document.createElement("canvas");
+  canvas.width = 1200; canvas.height = 760;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) { if (refs.resultShareStatus) refs.resultShareStatus.textContent = "Image export isn't supported in this browser."; return; }
+  const roundedRect = (x,y,w,h,r) => { ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); };
+  const dark = document.documentElement.dataset.theme === "dark";
+  const bg = dark ? "#111b15" : "#f4f8f4";
+  const card = dark ? "#1c2b22" : "#ffffff";
+  const ink = dark ? "#f1f8f2" : "#203329";
+  const muted = dark ? "#a7b8ac" : "#65786c";
+  const accent = dark ? "#a0e4b5" : "#256747";
+  ctx.fillStyle=bg;ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle=dark?"#24392c":"#e0f5e7";ctx.beginPath();ctx.arc(1040,90,190,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=card;roundedRect(70,55,1060,650,36);ctx.fill();
+  ctx.fillStyle=accent;roundedRect(110,95,58,58,18);ctx.fill();
+  ctx.fillStyle=dark?"#111b15":"#ffffff";ctx.font="bold 38px Arial";ctx.fillText("✿",125,137);
+  ctx.fillStyle=ink;ctx.font="bold 38px Arial";ctx.fillText("TypeBloom",188,129);
+  ctx.fillStyle=muted;ctx.font="bold 16px Arial";ctx.fillText("YOUR PRACTICE RESULT",190,155);
+  ctx.fillStyle=muted;ctx.font="22px Arial";ctx.fillText(refs.resultDate?.textContent||new Date().toLocaleDateString(),850,125);
+  ctx.fillStyle=ink;ctx.font="bold 30px Arial";ctx.fillText((refs.resultLabel?.textContent||"Typing result").toUpperCase(),110,226);
+  ctx.fillStyle=accent;ctx.font="bold 26px Arial";ctx.fillText(refs.resultHeadline?.textContent||"Nice work!",110,270);
+  const metrics=[
+    ["TYPING SPEED",(refs.resultWpm?.textContent||"—")+" "+(refs.resultWpmUnit?.textContent||"WPM")],
+    ["ACCURACY",refs.resultAccuracy?.textContent||"—"],
+    ["CORRECT CHARACTERS",refs.resultCorrect?.textContent||"—"],
+    ["MISTAKES",refs.resultErrors?.textContent||"—"]
+  ];
+  metrics.forEach((metric,index)=>{
+    const x=110+(index%2)*500,y=310+Math.floor(index/2)*150;
+    ctx.fillStyle=dark?"#25392c":"#edf4ef";roundedRect(x,y,460,120,22);ctx.fill();
+    ctx.fillStyle=muted;ctx.font="bold 17px Arial";ctx.fillText(metric[0],x+24,y+35);
+    ctx.fillStyle=ink;ctx.font="bold 42px Arial";ctx.fillText(metric[1],x+24,y+85);
+  });
+  ctx.fillStyle=muted;ctx.font="bold 20px Arial";ctx.fillText("Small steps. Real progress.",110,660);
+  ctx.fillStyle=accent;ctx.font="bold 20px Arial";ctx.fillText("typebloom-deg.pages.dev",800,660);
+  canvas.toBlob(blob=>{
+    if(!blob){if(refs.resultShareStatus)refs.resultShareStatus.textContent="Could not export the result card.";return;}
+    const url=URL.createObjectURL(blob);const link=document.createElement("a");link.href=url;link.download="typebloom-result.png";document.body.append(link);link.click();link.remove();URL.revokeObjectURL(url);
+    if(refs.resultShareStatus)refs.resultShareStatus.textContent="Score card downloaded as PNG.";
+  },"image/png");
 }
 function currentText() {
   if (state.kind === "weak") return state.weakText;
