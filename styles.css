@@ -548,3 +548,40 @@ body.info-page {
   .share-result-button, .download-result-button { flex: 1; }
   .progress-open-button { font-size: .65rem; padding: 7px 9px; }
 }
+
+
+/* Content-quality pages: readable learning material below the interactive tool */
+.learning-article { max-width: 900px; }
+.learning-article h2 { scroll-margin-top: 24px; }
+.learning-article h3 { margin-top: 23px; }
+.learning-article p { line-height: 1.8; }
+.learning-article ol { padding-left: 1.35rem; color: var(--muted); }
+.learning-article li { margin: 9px 0; padding-left: 4px; line-height: 1.7; }
+.learning-formula {
+  margin: 16px 0;
+  padding: 15px 18px;
+  border: 1px solid color-mix(in srgb, var(--mint) 52%, var(--line));
+  border-radius: 13px;
+  background: var(--mint-pale);
+  color: var(--mint-deep) !important;
+  font-family: "DM Mono", ui-monospace, monospace;
+  font-size: .91rem;
+}
+.learning-article a:not(.begin-button) { font-weight: 900; }
+.typing-guide-content {
+  width: min(100% - 56px, 1100px);
+  margin: 28px auto 35px;
+  border: 1px solid var(--line);
+  border-radius: 23px;
+  background: var(--surface);
+  box-shadow: var(--soft-shadow);
+}
+.typing-guide-content .publisher-copy { max-width: 900px; margin: 0 auto; }
+.typing-guide-content h2 { margin-top: 7px; }
+.typing-guide-content h3 { margin-top: 23px; }
+.typing-guide-content p, .typing-guide-content li { line-height: 1.75; }
+.publisher-guide-cta { margin-top: 17px; }
+@media (max-width: 720px) {
+  .typing-guide-content { width: min(100% - 28px, 580px); margin-top: 17px; padding: 19px 17px; border-radius: 19px; }
+  .learning-formula { overflow-wrap: anywhere; font-size: .78rem; }
+}
