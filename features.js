@@ -54,11 +54,11 @@ $("progressBackupFile")?.addEventListener("change",async e=>{
  }catch(err){$("backupStatus").textContent=err.message||"Could not read this backup. Existing progress is unchanged.";}
  finally{e.target.value="";}
 });
-const rows=["qwertyuiop","asdfghjkl","zxcvbnm"],words=("after again answer apple around balance basic become better bright build calm careful character choose clear cloud common complete confident correct create daily detail easy effort every example finger focus flower gentle good grow habit hands happy help home improve inside jump keyboard kind learn letter light little make natural notice open people practice precise progress quick quiet reach read repeat reliable rhythm right safe school smooth soft space steady student study sunny sure system thank think touch train tree useful warm water welcome work write").split(" ");
+const rows=["1234567890","qwertyuiop","asdfghjkl","zxcvbnm"],words=("after again answer apple around balance basic become better bright build calm careful character choose clear cloud common complete confident correct create daily detail easy effort every example finger focus flower gentle good grow habit hands happy help home improve inside jump keyboard kind learn letter light little make natural notice open people practice precise progress quick quiet reach read repeat reliable rhythm right safe school smooth soft space steady student study sunny sure system thank think touch train tree useful warm water welcome work write").split(" ");
 function allMistakes(){const totals={},patterns={};sessionData().forEach(s=>(Array.isArray(s.mistakes)?s.mistakes:[]).forEach(m=>{
  const label=String(m.label||""),count=Math.max(0,Number(m.count)||0);if(!count)return;
  if(label==="space")totals[" "] = (totals[" "]||0)+count;
- else{const expected=Array.from(label.split(" → ")[0]||"")[0];if(expected&&/^[a-z]$/i.test(expected))totals[expected.toLowerCase()]=(totals[expected.toLowerCase()]||0)+count;}
+ else{const expected=Array.from(label.split(" → ")[0]||"")[0];if(expected&&/^[a-z0-9]$/i.test(expected))totals[expected.toLowerCase()]=(totals[expected.toLowerCase()]||0)+count;}
  patterns[label]=(patterns[label]||0)+count;
 }));return{totals,patterns:Object.entries(patterns).map(([label,count])=>({label,count})).sort((a,b)=>b.count-a.count).slice(0,8)};}
 function buildDrill(k){if(k===" ")return "a calm pace is easier to keep. read each phrase and leave a clear space between every word. steady practice makes typing feel natural.";
@@ -71,7 +71,7 @@ function renderHeatmap(){
  const patternsHost=$("heatmapPatterns");patternsHost.replaceChildren();if(!patterns.length){const p=document.createElement("p");p.className="progress-history-note";p.textContent="No key-level mistakes recorded yet. Complete a new session to start this view.";patternsHost.append(p);}else{const h=document.createElement("p");h.className="eyebrow";h.textContent="Most repeated mismatch patterns";patternsHost.append(h);patterns.slice(0,5).forEach(x=>{const p=document.createElement("span");p.className="heat-pattern";p.textContent=x.label+" · "+x.count;patternsHost.append(p);});}
 }
 $("targetedDrillButton")?.addEventListener("click",()=>{
- const p=allMistakes().patterns.filter(x=>x.label!=="space").slice(0,5);if(!p.length){$("heatmapStatus").textContent="Complete a new practice session first. Your result will provide the patterns for this drill.";return;}
+ const p=allMistakes().patterns.filter(x=>x.label!=="space"&&!x.label.startsWith("extra →")).slice(0,5);if(!p.length){$("heatmapStatus").textContent="Complete a new practice session first. Your result will provide the patterns for this drill.";return;}
  const texts=p.map(x=>{const c=Array.from(x.label.split(" → ")[0]||"")[0]?.toLowerCase();return c?buildDrill(c):"";}).filter(Boolean);
  startDrill(texts.join(" ").slice(0,1200),"Targeted keyboard drill");
 });
