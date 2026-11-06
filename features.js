@@ -61,7 +61,7 @@ function allMistakes(){const totals={},patterns={};sessionData().forEach(s=>(Arr
  else{const expected=Array.from(label.split(" → ")[0]||"")[0];if(expected&&/^[a-z0-9]$/i.test(expected))totals[expected.toLowerCase()]=(totals[expected.toLowerCase()]||0)+count;}
  patterns[label]=(patterns[label]||0)+count;
 }));return{totals,patterns:Object.entries(patterns).map(([label,count])=>({label,count})).sort((a,b)=>b.count-a.count).slice(0,8)};}
-function buildDrill(k){if(k===" ")return "a calm pace is easier to keep. read each phrase and leave a clear space between every word. steady practice makes typing feel natural.";
+function buildDrill(k){if(k===" ")return "a calm pace is easier to keep. read each phrase and leave a clear space between every word. steady practice makes typing feel natural.";if(/^[0-9]$/.test(k))return ("1234567890 "+k+" 2026 1234 5678 9090 2468 1357 ").repeat(8);
  const found=words.filter(w=>w.includes(k)),bank=found.length?found:words,t=[];while(t.join(" ").length<420)t.push(bank[t.length%bank.length]);return t.join(" ").slice(0,700);}
 function startDrill(text,label){const ok=app.startCustom(text,2,label);$("heatmapStatus").textContent=ok?"Your focused drill is ready in the practice area.":"The focused drill could not be started.";}
 function renderHeatmap(){
