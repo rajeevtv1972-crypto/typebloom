@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet" />
     <link rel="icon" type="image/svg+xml" href="logo.svg" />
     <link rel="apple-touch-icon" href="logo.svg" />
-    <link rel="stylesheet" href="styles.css?v=20261103-content-quality-1" />
+    <link rel="stylesheet" href="styles.css?v=20261106-feature-pack-1" />
     <link rel="canonical" href="https://typebloom-deg.pages.dev/typing" />
     <meta property="og:title" content="Free Typing Test & Practice – Check WPM & Accuracy | TypeBloom" />
     <meta property="og:description" content="Take a free typing test, practice beginner to advanced passages, track WPM and accuracy, and improve your typing with TypeBloom." />
@@ -35,6 +35,7 @@
       <div class="top-actions">
         <p>✦ Tiny steps, big progress</p>
         <a class="home-button" href="/">Home</a>
+        <a class="home-button" href="/lessons">Lessons</a>
         <button id="progressButton" class="home-button progress-open-button" type="button">Progress ↗</button>
         <button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch to dark theme"><span id="themeIcon">☾</span></button>
       </div>
@@ -71,6 +72,13 @@
           <div class="test-type-buttons"><button class="test-type" type="button" data-test="speed"><i>⚡</i><span><b>Speed test</b><small>Track WPM</small></span></button><button class="test-type" type="button" data-test="cpm"><i>⌁</i><span><b>CPM test</b><small>Track characters</small></span></button></div>
           <div id="durationGrid" class="duration-grid" aria-label="Choose test duration"></div>
         </section>
+        <section class="custom-text-studio" aria-labelledby="customTextHeading">
+          <p class="eyebrow">✍ Your own passage</p><h2 id="customTextHeading">Custom text practice</h2>
+          <p>Paste text you want to practise. It stays in this session and is not added to saved progress.</p>
+          <label for="customTextSource">Your passage</label><textarea id="customTextSource" rows="4" maxlength="4000" placeholder="Paste at least 20 characters here…"></textarea>
+          <div class="custom-text-controls"><label for="customDuration">Duration</label><select id="customDuration"><option value="2">2 minutes</option><option value="3">3 minutes</option><option value="5">5 minutes</option><option value="10">10 minutes</option><option value="15">15 minutes</option></select></div>
+          <button id="startCustomButton" class="custom-start-button" type="button">Start custom practice →</button><p id="customTextStatus" class="feature-status" role="status" aria-live="polite"></p>
+        </section>
         <div class="sidebar-footer"><span>🌼</span><p><strong id="totalCompleted">0</strong> of 60 little wins<br />collected so far.</p></div>
       </aside>
 
@@ -79,7 +87,7 @@
         <section class="typing-card" aria-label="Current typing challenge">
           <div class="card-top"><span id="challengeChip" class="chip">Easy start</span><span id="tipText" class="tip">Relax your shoulders and look ahead.</span></div>
           <div class="prompt-box"><p id="typingPrompt" class="typing-prompt" aria-label="Text to type">slow hands make steady progress</p></div>
-          <label class="sr-only" for="typingInput">Type the prompt</label><textarea id="typingInput" rows="3" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="Click here and begin typing..."></textarea><p id="inputHelp" class="input-help">Your timer begins with the first letter. No pressure.</p>
+          <label class="sr-only" for="typingInput">Type the prompt</label><textarea id="typingInput" rows="3" spellcheck="false" autocomplete="off" autocapitalize="off" aria-describedby="inputHelp" placeholder="Click here and begin typing..."></textarea><p id="inputHelp" class="input-help" role="status" aria-live="polite">Your timer begins with the first letter. No pressure.</p>
           <div class="card-bottom"><div class="progress-area"><div id="progressTrack" class="progress-track" role="progressbar" aria-label="Challenge progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="progressFill"></div></div><span id="progressLabel">0% complete</span></div><button id="resetButton" class="reset-button" type="button">↻ Start over</button></div>
         </section>
         <section class="stats-row" aria-label="Live typing statistics"><article class="stat"><i class="mint">⚡</i><div><p id="primaryStatName">Speed</p><strong id="primaryStat">0 <small>WPM</small></strong></div></article><article class="stat"><i class="peach">◎</i><div><p>Accuracy</p><strong id="accuracyStat">100<small>%</small></strong></div></article><article class="stat"><i class="lavender">◷</i><div><p id="timeStatName">Time</p><strong id="timeStat">0:00</strong></div></article><article class="stat best-stat"><i class="yellow">★</i><div><p>Personal best</p><strong id="bestStat">—</strong></div></article></section>
@@ -151,6 +159,7 @@
         <div>
           <p class="eyebrow">Explore</p>
           <a href="/learn">Typing guide</a>
+          <a href="/lessons">Touch-typing lessons</a>
           <a href="/about">About TypeBloom</a>
           <a href="/privacy-policy">Privacy Policy</a>
           <a href="/contact">Contact Us</a>
@@ -191,6 +200,33 @@
           <section class="progress-insight-card"><p class="eyebrow">What is improving?</p><h3 id="progressImprovementTitle">Your baseline starts here</h3><p id="progressImprovementCopy">Complete a few sessions to see how your speed and accuracy change over time.</p><div class="progress-period-summary"><span id="progressSessionsCount">0 sessions recorded</span><span id="progressBestStreak">Keep building your rhythm 🌱</span></div></section>
         </div>
         <p id="progressHistoryNote" class="progress-history-note">Progress history is stored only in this browser. New trend data is recorded when you complete a challenge or timed test.</p>
+        <section class="progress-feature-card" aria-labelledby="goalSettingsTitle">
+          <div class="progress-feature-heading"><div><p class="eyebrow">🎯 Your weekly plan</p><h3 id="goalSettingsTitle">Personal goals</h3><p>Set a realistic daily practice target and a speed and accuracy milestone.</p></div></div>
+          <form id="goalSettingsForm" class="goals-form">
+            <label>Minutes per day<input id="goalDailyMinutes" type="number" min="1" max="180" step="1" value="10" required></label>
+            <label>WPM target<input id="goalTargetWpm" type="number" min="1" max="250" step="1" value="40" required></label>
+            <label>Accuracy target (%)<input id="goalTargetAccuracy" type="number" min="50" max="100" step="1" value="95" required></label>
+            <button class="custom-start-button" type="submit">Save goals</button><span id="goalSaveStatus" class="feature-status" role="status" aria-live="polite"></span>
+          </form>
+          <div class="goal-progress-grid">
+            <article><span>Today's practice</span><strong id="goalTodayValue">0 / 10 min</strong><div class="goal-meter" id="goalTodayMeter" role="progressbar" aria-label="Today's practice goal" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span></span></div></article>
+            <article><span>Last 7 days</span><strong id="goalWeekValue">0 / 70 min</strong><div class="goal-meter" id="goalWeekMeter" role="progressbar" aria-label="Weekly practice goal" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span></span></div></article>
+            <article><span>Average WPM · 7 days</span><strong id="goalWpmValue">—</strong><small id="goalWpmMeta">Target: 40 WPM</small></article>
+            <article><span>Average accuracy · 7 days</span><strong id="goalAccuracyValue">—</strong><small id="goalAccuracyMeta">Target: 95%</small></article>
+          </div><p id="goalWeekSummary" class="progress-history-note"></p>
+        </section>
+        <section class="progress-feature-card" aria-labelledby="backupTitle">
+          <div class="progress-feature-heading"><div><p class="eyebrow">🛟 Keep your history safe</p><h3 id="backupTitle">Progress backup</h3><p>Export a JSON backup to move your progress to another browser or device. Importing replaces the progress saved in this browser.</p></div></div>
+          <div class="backup-actions"><button id="exportProgressButton" class="custom-start-button" type="button">Download backup ↓</button><button id="importProgressButton" class="outline-button" type="button">Import backup ↑</button><input id="progressBackupFile" type="file" accept="application/json,.json" hidden></div>
+          <p id="backupStatus" class="feature-status" role="status" aria-live="polite">Backups are created locally and are never uploaded by TypeBloom.</p>
+        </section>
+        <section class="progress-feature-card" aria-labelledby="heatmapTitle">
+          <div class="progress-feature-heading"><div><p class="eyebrow">⌨ Learn your keyboard</p><h3 id="heatmapTitle">Keyboard heatmap</h3><p>Keys with more recorded target-character mistakes appear more prominent. The heatmap builds from sessions completed after this update.</p></div></div>
+          <div id="keyboardHeatmap" class="keyboard-heatmap" aria-describedby="heatmapHelp"></div>
+          <p id="heatmapHelp" class="progress-history-note">Select a key to start a short drill focused on that character. Historical sessions without key-level details remain in your dashboard but cannot be reconstructed into a heatmap.</p>
+          <div id="heatmapPatterns" class="heatmap-patterns"></div>
+          <button id="targetedDrillButton" class="custom-start-button" type="button">Practise my most-missed keys →</button><p id="heatmapStatus" class="feature-status" role="status" aria-live="polite"></p>
+        </section>
       </div>
     </dialog>
 
@@ -201,6 +237,7 @@
       </div>
       <div id="dialogBody" class="dialog-body"></div>
     </dialog>
-    <script src="app.js?v=20261010-progress-results-4"></script>
+    <script src="app.js?v=20261106-feature-pack-1"></script>
+    <script src="features.js?v=20261106-feature-pack-1"></script>
   </body>
 </html>
