@@ -54,11 +54,15 @@
           (character.toLowerCase() === targetChar.toLowerCase() ? " target" : "");
         key.textContent = character;
         if (character.toLowerCase() === targetChar.toLowerCase()) key.setAttribute("aria-current", "true");
-        host.append(row);
         row.append(key);
       });
       host.append(row);
     });
+    const spaceKey = document.createElement("span");
+    spaceKey.className = "lesson-key lesson-space-key" + (targetChar === " " ? " target" : "");
+    spaceKey.textContent = "space";
+    if (targetChar === " ") spaceKey.setAttribute("aria-current", "true");
+    host.append(spaceKey);
   }
   function renderList() {
     const completed = Array.isArray(loadData().touchLessons) ? loadData().touchLessons : [];
