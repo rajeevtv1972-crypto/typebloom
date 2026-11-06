@@ -419,7 +419,7 @@ let state = {
   kind: "practice", mode: saved.lastMode || "beginner", level: saved.lastLevel || 1,
   testType: "speed", duration: 2, promptIndex: 0, startedAt: null, elapsed: 0,
   timer: null, finished: false, totalTyped: 0, totalCorrect: 0, totalErrors: 0, errorMap: {}, lineStarts: [0], lineHeight: 0,
-  dailyChallenge: null, weakText: ""
+  dailyChallenge: null, weakText: "", customText: "", customLabel: "Custom text"
 };
 
 function loadSaved() {
@@ -463,12 +463,14 @@ function recordSession(stats, details) {
     typed: Number(stats.typed) || 0,
     correct: Number(stats.correct) || 0,
     errors: Number(state.totalErrors) || 0,
+    mistakes: getErrorEntries().slice(0, 15).map(entry => ({ label: String(entry.label), count: Number(entry.count) || 0 })),
     seconds: Math.max(0, Number(state.elapsed) || 0),
     duration: state.duration,
     mode: state.mode,
     level: state.level
   };
   saved.sessions = (Array.isArray(saved.sessions) ? saved.sessions : []).concat(session).slice(-500);
+  try { window.dispatchEvent(new CustomEvent("typebloom:session-recorded", { detail: session })); } catch (error) {}
   return session;
 }
 function localDateKey(date) {
@@ -750,6 +752,7 @@ function downloadResultCard() {
   },"image/png");
 }
 function currentText() {
+  if (state.kind === "custom") return state.customText;
   if (state.kind === "weak") return state.weakText;
   if (state.kind === "daily") return state.dailyChallenge?.text || getDailyChallenge().text;
   if (state.kind === "practice" || state.kind === "weak") {
@@ -764,7 +767,8 @@ function currentText() {
 }
 function key() {
   if (state.kind === "daily") return "daily";
-  return state.kind === "practice" ? state.mode + "-" + state.level : state.testType + "-" + state.duration;
+  if (state.kind === "custom") return "custom-" + state.duration;
+  return state.kind === "custom" ? "custom-" + state.duration : state.kind === "practice" ? state.mode + "-" + state.level : state.testType + "-" + state.duration;
 }
 function formatTime(seconds) {
   const mins = Math.floor(Math.max(0, seconds) / 60);
@@ -976,6 +980,26 @@ function selectTimed(type, duration) {
   state.kind = type; state.testType = type; state.duration = duration || state.duration; renderTimed();
   requestAnimationFrame(() => refs.input.focus());
 }
+function selectCustom(text, duration = 2, label = "Custom text") {
+  const content = String(text || "").replace(/\r\n?/g, "\n").trim().slice(0, 4000);
+  if (content.length < 20) return false;
+  state.kind = "custom";
+  state.testType = "speed";
+  state.duration = Math.min(15, Math.max(2, Number(duration) || 2));
+  state.customText = content;
+  state.customLabel = String(label || "Custom text").trim().slice(0, 60) || "Custom text";
+  state.promptIndex = 0;
+  cleanChallenge();
+  refs.meta.textContent = "Custom passage · " + state.duration + " minutes";
+  refs.title.textContent = "Type your own words";
+  refs.chip.textContent = content.split(/\s+/).length + " words · custom";
+  refs.tip.textContent = "Your text, your pace. Keep it accurate.";
+  refs.inputHelp.textContent = "The countdown begins with your first key. Your custom passage repeats until the timer ends; the passage itself is not saved in your progress history.";
+  refs.primaryName.textContent = "Speed"; refs.timeName.textContent = "Time left";
+  renderPrompt(true); refreshStats(); setBest(); updateNav();
+  requestAnimationFrame(() => refs.input.focus());
+  return true;
+}
 function startTimer() {
   if (state.startedAt) return;
   state.startedAt = Date.now();
@@ -1043,15 +1067,17 @@ function finishTimed() {
   const baseline = getSessionSummary();
   collectCurrentErrors();
   state.finished = true; state.elapsed = state.duration * 60; stopTimer(); refs.input.disabled = true;
+  const isCustom = state.kind === "custom";
   const stats = statValues(); const isCpm = state.testType === "cpm"; const value = isCpm ? stats.cpm : stats.wpm; const unit = isCpm ? "CPM" : "WPM";
   const old = saved.best[key()]; const isBest = !old || value > old.value || (value === old.value && stats.accuracy > old.accuracy);
-  if (isBest) saved.best[key()] = { value, accuracy: stats.accuracy }; saved.recent = { kind: state.testType, duration: state.duration, value, accuracy: stats.accuracy, unit, errors: getErrorEntries().slice(0, 5), at: Date.now() };
-  refs.celebrationEyebrow.textContent = state.duration + "-minute test complete";
+  if (isBest) saved.best[key()] = { value, accuracy: stats.accuracy }; saved.recent = { kind: isCustom ? "custom" : state.testType, duration: state.duration, value, accuracy: stats.accuracy, unit, errors: getErrorEntries().slice(0, 5), at: Date.now() };
+  refs.celebrationEyebrow.textContent = isCustom ? "Custom session complete" : state.duration + "-minute test complete";
   refs.celebrationTitle.textContent = isBest ? "A fresh personal best!" : "Strong, steady work!";
   refs.celebrationCopy.textContent = value + " " + unit + " at " + stats.accuracy + "% accuracy. " + (isBest ? "That is a lovely new benchmark." : "Try it again when you feel ready.") + " Press Enter to continue.";
-  refs.next.textContent = "Try another duration →";
-  recordSession(stats, {kind: state.testType, label: state.duration + "-minute " + (isCpm ? "CPM test" : "speed test")});
-  showResultDetails(stats, baseline, {label: state.duration + "-minute " + (isCpm ? "CPM test" : "speed test")}, isBest, value, unit);
+  refs.next.textContent = isCustom ? "Repeat custom session →" : "Try another duration →";
+  const resultLabel = isCustom ? state.customLabel : state.duration + "-minute " + (isCpm ? "CPM test" : "speed test");
+  recordSession(stats, {kind: isCustom ? "custom" : state.testType, label: resultLabel});
+  showResultDetails(stats, baseline, {label: resultLabel}, isBest, value, unit);
   refs.celebration.hidden = false; refreshStats(); setBest(); renderErrorAnalysis(); save();
   requestAnimationFrame(() => refs.next.focus());
 }
@@ -1072,12 +1098,13 @@ function onTyping() {
   else if (state.kind !== "practice" && state.kind !== "daily" && state.kind !== "weak" && refs.input.value.length >= currentText().length) nextPrompt();
 }
 function reset() {
-  if (state.kind === "practice") renderPractice(); else if (state.kind === "weak") renderWeakPractice(); else if (state.kind === "daily") renderDaily(); else renderTimed();
+  if (state.kind === "practice") renderPractice(); else if (state.kind === "weak") renderWeakPractice(); else if (state.kind === "daily") renderDaily(); else if (state.kind === "custom") selectCustom(state.customText, state.duration, state.customLabel); else renderTimed();
   refs.input.focus();
 }
 function next() {
   if (state.kind === "weak") { renderWeakPractice(); refs.input.focus(); return; }
   if (state.kind === "daily") { selectDaily(); return; }
+  if (state.kind === "custom") { selectCustom(state.customText, state.duration, state.customLabel); return; }
   if (state.kind !== "practice") { selectTimed(state.testType, state.duration); return; }
   if (state.level < 20) selectPractice(state.mode, state.level + 1);
   else {
@@ -1154,3 +1181,4 @@ const savedLevel = Math.min(20, Math.max(1, state.level));
 if (new URLSearchParams(window.location.search).get("daily") === "1") selectDaily();
 else selectPractice(state.mode, isLevelUnlocked(state.mode, savedLevel) ? savedLevel : 1);
 if (refs.copyrightYear) refs.copyrightYear.textContent = String(new Date().getFullYear());
+window.TypeBloomApp = { getData: () => saved, persist: () => save(), startCustom: (text, duration, label) => selectCustom(text, duration, label) };
