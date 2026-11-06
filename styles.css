@@ -639,3 +639,15 @@ body.info-page {
 .custom-practice-promo{display:flex;align-items:center;justify-content:space-between;gap:22px;margin:28px auto;padding:clamp(20px,3vw,32px);border:1px solid var(--line);border-radius:22px;background:var(--surface);box-shadow:var(--soft-shadow)}
 .custom-practice-promo h2{margin:6px 0;color:var(--ink);font-size:clamp(1.3rem,2.4vw,1.9rem)}.custom-practice-promo p:not(.eyebrow){max-width:660px;margin:8px 0 0;color:var(--muted);line-height:1.7}.custom-practice-promo .begin-button{flex:0 0 auto;text-decoration:none}
 @media(max-width:720px){.custom-practice-promo{align-items:stretch;flex-direction:column}.custom-practice-promo .begin-button{width:100%;justify-content:center}}
+
+
+/* Accessibility refinements from the mobile Lighthouse audit */
+.progression-number{color:var(--ink);opacity:.78}
+.progression-card p{color:var(--ink)}
+.intermediate-card>span{background:var(--peach-pale);color:#85452f}
+.advanced-card>span{background:var(--lavender-pale);color:#514078}
+.site-footer .footer-grid a,.site-footer .footer-bottom a,.site-footer .footer-bottom button{
+  display:inline-flex;align-items:center;min-height:44px;padding:9px 6px;margin-top:0;line-height:1.35
+}
+.skip-link{position:absolute;top:8px;left:8px;z-index:10000;transform:translateY(-160%);padding:10px 14px;border-radius:10px;background:var(--ink);color:var(--bg);font-weight:900;text-decoration:none;box-shadow:var(--shadow)}
+.skip-link:focus{transform:translateY(0)}
