@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Learn touch typing step by step with guided home-row, top-row, bottom-row, number, punctuation and mixed-key exercises.">
+  <meta name="google-adsense-account" content="ca-pub-3756147512527882">
+  <title>Touch Typing Lessons: Learn Keyboard Finger Placement | TypeBloom</title>
+  <link rel="canonical" href="https://typebloom-deg.pages.dev/lessons">
+  <meta property="og:title" content="Touch Typing Lessons | TypeBloom">
+  <meta property="og:description" content="Guided keyboard lessons for home-row keys, finger placement, numbers, punctuation and typing rhythm.">
+  <meta property="og:url" content="https://typebloom-deg.pages.dev/lessons">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="TypeBloom">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Touch Typing Lessons | TypeBloom">
+  <meta name="twitter:description" content="Practise keyboard finger placement with guided exercises and a visual keyboard.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=20261106-feature-pack-1">
+</head>
+<body class="info-page">
+  <header>
+    <p class="eyebrow">TypeBloom typing school</p>
+    <h1>Learn touch typing, one finger at a time</h1>
+    <p>Build a reliable home-row position, learn where each finger belongs, and practise each keyboard row with guided exercises.</p>
+  </header>
+  <nav aria-label="Main navigation">
+    <a href="/">Home</a>
+    <a href="/typing">Start Typing</a>
+    <a href="/learn">Typing guide</a>
+    <a href="/lessons" aria-current="page">Lessons</a>
+    <a href="/about">About</a>
+    <a href="/contact">Contact</a>
+  </nav>
+  <main class="lessons-main">
+    <article class="card lessons-card">
+      <p class="eyebrow">Guided practice · 9 short lessons</p>
+      <h2>Build your keyboard foundation</h2>
+      <p>Choose a lesson, read the finger-placement tip, then type the practice line. The keyboard highlights the next key. Your completed lesson list is stored locally in this browser; the text you type is not saved.</p>
+      <div class="lesson-layout">
+        <aside id="lessonList" class="lesson-list" aria-label="Touch typing lesson list"></aside>
+        <section class="lesson-trainer" aria-labelledby="lessonTitle">
+          <p class="eyebrow" id="lessonMeta">Lesson 1 of 9</p>
+          <h2 id="lessonTitle">Find the home row</h2>
+          <p id="lessonDescription"></p>
+          <p id="lessonInstruction" class="lesson-instruction"></p>
+          <div id="lessonKeyboard" class="lesson-keyboard" aria-label="Visual keyboard showing the next key"></div>
+          <div class="lesson-keyboard-legend" aria-label="Finger colour guide">
+            <span><i class="finger-swatch swatch-pinky"></i>Pinky</span>
+            <span><i class="finger-swatch swatch-ring"></i>Ring</span>
+            <span><i class="finger-swatch swatch-middle"></i>Middle</span>
+            <span><i class="finger-swatch swatch-left-index"></i>Left index</span>
+            <span><i class="finger-swatch swatch-right-index"></i>Right index</span>
+          </div>
+          <h3>Practice line</h3>
+          <div id="lessonPrompt" class="lesson-prompt" aria-label="Text to type"></div>
+          <div class="lesson-score">
+            <span id="lessonProgressText">0% complete</span>
+            <span id="lessonAccuracy">100% accuracy</span>
+            <span id="lessonStatus">Ready</span>
+          </div>
+          <div class="lesson-progress-track" id="lessonProgress" role="progressbar" aria-label="Lesson completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span></span></div>
+          <label for="lessonInput" class="sr-only">Type the lesson practice line</label>
+          <textarea id="lessonInput" class="lesson-input" rows="3" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="Place your fingers, then begin typing…"></textarea>
+          <p id="lessonFeedback" class="lesson-complete-message" role="status" aria-live="polite"></p>
+          <div class="lesson-actions">
+            <button id="lessonReset" class="outline-button" type="button">Restart lesson</button>
+            <button id="lessonNext" class="begin-button" type="button">Next lesson →</button>
+          </div>
+        </section>
+      </div>
+      <section class="publisher-copy lesson-explainer">
+        <h2>How to use the finger guide</h2>
+        <p>Rest the fingers of your left hand on A, S, D and F, and the fingers of your right hand on J, K, L and semicolon. The small raised marks on F and J help you find the starting position without looking. Use each finger for its nearby group of keys, then return to the home row.</p>
+        <p>Give yourself time to learn the movement before trying to type quickly. If your wrists or hands become uncomfortable, pause, relax, and adjust your position. A comfortable, repeatable technique matters more than finishing a lesson quickly.</p>
+        <p>When the basic patterns feel familiar, move to <a href="/typing">progressive typing practice</a> and try a timed test after a few focused sessions.</p>
+      </section>
+    </article>
+  </main>
+  <footer>© 2026 TypeBloom · <a href="/">Home</a> · <a href="/typing">Start Typing</a> · <a href="/learn">Typing guide</a> · <a href="/privacy-policy">Privacy Policy</a> · <a href="/contact">Contact</a></footer>
+  <script src="lessons.js?v=20261106-feature-pack-1"></script>
+</body>
+</html>
