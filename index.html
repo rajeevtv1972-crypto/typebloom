@@ -380,7 +380,7 @@
     set("snapshotAccuracy",bestAccuracy?bestAccuracy+"%":"—");
     const recent=saved.recent||null;
     if(recent){
-      const recentLabel=recent.kind==="practice" ? (String(recent.mode||"").charAt(0).toUpperCase()+String(recent.mode||"").slice(1)+" · Level "+(recent.level||1)) : recent.kind==="daily" ? "Daily Challenge" : (recent.kind==="speed" ? "Speed Test · "+recent.duration+" min" : "CPM Test · "+recent.duration+" min");
+      const recentLabel=recent.kind==="practice" ? (String(recent.mode||"").charAt(0).toUpperCase()+String(recent.mode||"").slice(1)+" · Level "+(recent.level||1)) : recent.kind==="daily" ? "Daily Challenge" : recent.kind==="custom" ? "Custom text · "+(recent.duration||2)+" min" : (recent.kind==="speed" ? "Speed Test · "+recent.duration+" min" : "CPM Test · "+recent.duration+" min");
       set("snapshotLast",recent.value+" "+(recent.unit||"WPM"));
       set("snapshotLastMeta",recentLabel+" · "+recent.accuracy+"% accuracy.");
     } else {
@@ -389,7 +389,7 @@
     }
     set("snapshotWpmMeta",bestWpm?"Your highest saved WPM across practice and speed tests.":"Complete a test to set your benchmark.");
     set("snapshotAccuracyMeta",bestAccuracy?"Best accuracy saved on this browser.":"Your most accurate recorded result will appear here.");
-    set("snapshotLastMeta",saved.lastMode?"Your last selected practice level.":"Start your first challenge to begin.");
+    if(!recent) set("snapshotLastMeta",saved.lastMode?"Your last selected practice level.":"Start your first challenge to begin.");
     set("snapshotDaily",todayDone?"Completed ✓":"Ready");
     set("snapshotDailyMeta",todayDone?"Nice work — your streak is alive.":"60 seconds · 95%+ accuracy to complete.");
     set("homeDailyStreak",streak);
