@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet" />
     <link rel="icon" type="image/svg+xml" href="logo.svg" />
     <link rel="apple-touch-icon" href="logo.svg" />
-    <link rel="stylesheet" href="styles.css?v=20261103-content-quality-1" />
+    <link rel="stylesheet" href="styles.css?v=20261106-feature-pack-1" />
     <link rel="canonical" href="https://typebloom-deg.pages.dev/" />
     <meta property="og:title" content="Free Typing Test & Practice – Improve WPM | TypeBloom" />
     <meta property="og:description" content="Practice typing for free with live WPM and accuracy, progressive levels, daily challenges, timed tests, and local progress tracking with TypeBloom." />
@@ -89,6 +89,7 @@
       <div class="top-actions">
         <p>✦ Tiny steps, big progress</p>
         <a class="home-button" href="/learn">Learn</a>
+        <a class="home-button" href="/lessons">Touch lessons</a>
         <button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch to dark theme"><span id="themeIcon">☾</span></button>
       </div>
     </header>
@@ -225,6 +226,10 @@
         <div class="daily-home-art" aria-hidden="true"><span>🌱</span><b>60s</b><small>random daily passage</small></div>
       </section>
 
+      <section class="lesson-promo-card" aria-labelledby="lessonPromoTitle">
+        <div><p class="eyebrow">⌨ Learn the movement, not just the score</p><h2 id="lessonPromoTitle">Know where every finger belongs.</h2><p>Follow guided home-row, top-row, bottom-row, number, and punctuation exercises with a visual keyboard that highlights the next key.</p></div>
+        <a class="begin-button" href="/lessons">Explore touch-typing lessons →</a>
+      </section>
       <section class="publisher-content" aria-labelledby="typingGuideTitle">
         <div class="publisher-copy">
           <p class="eyebrow">Typing practice guide</p>
@@ -271,6 +276,7 @@
         <div>
           <p class="eyebrow">Explore</p>
           <a href="/learn">Typing guide</a>
+          <a href="/lessons">Touch-typing lessons</a>
           <a href="/about">About TypeBloom</a>
           <a href="/privacy-policy">Privacy Policy</a>
           <a href="/contact">Contact Us</a>
@@ -291,7 +297,7 @@
   const root=document.documentElement;
   const toggle=document.getElementById("themeToggle");
   const icon=document.getElementById("themeIcon");
-  const saved=localStorage.getItem("typebloom-theme")||"light";
+  let saved="light"; try { saved=localStorage.getItem("typebloom-theme")||"light"; } catch(e) {}
   function applyTheme(theme){
     root.dataset.theme=theme;
     icon.textContent=theme==="dark"?"☀":"☾";
@@ -301,7 +307,7 @@
   toggle.addEventListener("click",function(){
     const next=root.dataset.theme==="dark"?"light":"dark";
     applyTheme(next);
-    localStorage.setItem("typebloom-theme",next);
+    try { localStorage.setItem("typebloom-theme",next); } catch(e) {}
   });
 })();
 </script>
