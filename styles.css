@@ -633,3 +633,9 @@ body.info-page {
 @media(max-width:720px){.lesson-promo-card{align-items:stretch;flex-direction:column}.lesson-promo-card .begin-button{width:100%;justify-content:center}}
 @media(max-width:520px){.lesson-list{grid-template-columns:1fr}.goal-progress-grid{grid-template-columns:1fr 1fr}.progress-feature-card{padding:15px}.backup-actions>*{flex:1 1 100%}.heatmap-row{gap:3px}.heat-key{height:34px;border-radius:6px}}
 @media(prefers-reduced-motion:reduce){.custom-start-button,.goal-meter span,.heat-key,.lesson-progress-track span{transition:none!important}.lesson-key.target{outline-offset:0}}
+
+.lesson-space-key{width:40%;max-width:280px;height:30px;margin:0 auto;text-align:center;font-family:Nunito,system-ui,sans-serif;font-size:.62rem;letter-spacing:.08em;text-transform:uppercase}
+.custom-text-studio textarea:focus-visible,.goals-form input:focus-visible,.custom-text-controls select:focus-visible,.lesson-input:focus-visible{outline:3px solid color-mix(in srgb,var(--mint-deep) 65%,transparent);outline-offset:2px}
+.custom-practice-promo{display:flex;align-items:center;justify-content:space-between;gap:22px;margin:28px auto;padding:clamp(20px,3vw,32px);border:1px solid var(--line);border-radius:22px;background:var(--surface);box-shadow:var(--soft-shadow)}
+.custom-practice-promo h2{margin:6px 0;color:var(--ink);font-size:clamp(1.3rem,2.4vw,1.9rem)}.custom-practice-promo p:not(.eyebrow){max-width:660px;margin:8px 0 0;color:var(--muted);line-height:1.7}.custom-practice-promo .begin-button{flex:0 0 auto;text-decoration:none}
+@media(max-width:720px){.custom-practice-promo{align-items:stretch;flex-direction:column}.custom-practice-promo .begin-button{width:100%;justify-content:center}}
